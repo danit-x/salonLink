@@ -1,0 +1,112 @@
+rules_version = '2';
+
+// =====================================================================================
+// SalonLink — Cloud Firestore security rules (v1: accounts, roles, invites)
+// -------------------------------------------------------------------------------------
+// These rules run on Google's servers for EVERY read and write. They are the real
+// security boundary: even a modified app or a raw API call cannot get past them
+// (proposal NFR-04). Anything not explicitly allowed below is denied.
+//
+// Tested by firebase/tests/rules.test.mjs against the local Firestore emulator.
+// =====================================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helper functions ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // The caller's own profile (users/{their uid}).
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isOwnerOf(salonId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && myProfile().role == 'OWNER'
+        && myProfile().salonId == salonId;
+    }
+
+    // Invites are keyed by lower-case email, matching the app (FormValidators.normaliseEmail).
+    function myEmailKey() {
+      return request.auth.token.email.lower();
+    }
+
+    function myInvitePath() {
+      return /databases/$(database)/documents/invites/$(myEmailKey());
+    }
+
+    // Optional string field: missing, null, or a string of at most `max` characters.
+    function optionalString(data, field, max) {
+      return !(field in data) || data[field] == null
+        || (data[field] is string && data[field].size() <= max);
+    }
+
+    // Shape check for a profile document: only known fields, with sensible types.
+    function validProfileShape(data) {
+      return data.keys().hasOnly(['name', 'email', 'phone', 'role', 'salonId', 'staffId', 'createdAt'])
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 60
+        && data.email == myEmailKey()
+        && optionalString(data, 'phone', 16);
+    }
+
+    // Role rules at sign-up:
+    //  - anyone may become a CUSTOMER (with no salon), or
+    //  - take EXACTLY the role/salon/staff record that their invite grants.
+    function allowedRole(data) {
+      return (data.role == 'CUSTOMER'
+                && data.get('salonId', null) == null
+                && data.get('staffId', null) == null)
+        || (exists(myInvitePath())
+                && data.role == get(myInvitePath()).data.role
+                && data.get('salonId', null) == get(myInvitePath()).data.salonId
+                && data.get('staffId', null) == get(myInvitePath()).data.get('staffId', null));
+    }
+
+    // ---------- users/{uid}: one profile per account ----------
+    match /users/{uid} {
+      // You can read your own profile. (Phase 6 lets staff read their customers' names.)
+      allow read: if isUser(uid);
+
+      // Created once, at registration, by the account owner.
+      allow create: if isUser(uid)
+        && validProfileShape(request.resource.data)
+        && allowedRole(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+
+      // Users may edit only their name and phone. role, salonId and email are locked.
+      allow update: if isUser(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone'])
+        && validProfileShape(request.resource.data);
+
+      // Account deletion is not offered in v1.
+      allow delete: if false;
+    }
+
+    // ---------- invites/{email}: grants STAFF/OWNER at registration ----------
+    match /invites/{email} {
+      // The invited person can read their own invite (the app checks it while registering),
+      // and an owner can read the invites for their salon.
+      allow read: if (signedIn() && myEmailKey() == email)
+        || (signedIn() && isOwnerOf(resource.data.salonId));
+
+      // Only an owner can invite, and only STAFF into their own salon.
+      // The first OWNER invite is created with admin access (seed script / console).
+      allow create, update: if isOwnerOf(request.resource.data.salonId)
+        && request.resource.data.role == 'STAFF'
+        && request.resource.data.keys().hasOnly(['role', 'salonId', 'staffId'])
+        && email == email.lower();
+
+      allow delete: if isOwnerOf(resource.data.salonId);
+    }
+
+    // Everything else stays locked until later phases add rules for it.
+  }
+}

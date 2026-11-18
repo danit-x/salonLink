@@ -1,7 +1,6 @@
 # SalonLink R8 / ProGuard rules (release builds only).
-# Firestore maps documents to our data classes by reflection, so keep their names.
-# DTO classes will live in this package from Phase 2.
--keep class com.group12.salonlink.data.firestore.dto.** { *; }
+# Firestore data is mapped by hand (see data/firestore/*Mappers.kt), not by reflection,
+# so no keep rules are needed for our model classes.
 
 # Keep line numbers so crash reports point at real source lines.
 -keepattributes SourceFile,LineNumberTable

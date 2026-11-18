@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,12 +14,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.group12.salonlink.core.designsystem.theme.SalonLinkTheme
-import com.group12.salonlink.core.navigation.SalonLinkNavHost
+import com.group12.salonlink.domain.model.AuthState
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * The app's only Activity ("single-activity architecture"). Every screen is a
- * Composable swapped in by Navigation Compose inside [SalonLinkNavHost].
+ * Composable chosen by [SalonLinkRoot].
  *
  * @AndroidEntryPoint lets Hilt inject dependencies into this Activity and the
  * ViewModels created inside it.
@@ -26,10 +27,16 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    private val rootViewModel: RootViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Must run before super.onCreate(): shows the branded splash, then switches theme.
-        installSplashScreen()
+        // Must run before super.onCreate(): shows the branded splash screen.
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Keep the splash up until we know whether someone is signed in. This avoids a
+        // flash of the Welcome screen for users who are already logged in.
+        splash.setKeepOnScreenCondition { rootViewModel.authState.value is AuthState.Loading }
 
         // Draw behind the status and navigation bars (the Figma screens are full-bleed).
         // The light style keeps the system bar icons dark on our cream background.
@@ -45,7 +52,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background),
                 ) {
-                    SalonLinkNavHost()
+                    SalonLinkRoot(viewModel = rootViewModel)
                 }
             }
         }

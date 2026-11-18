@@ -12,6 +12,8 @@ import com.group12.salonlink.core.navigation.ConciergeRoute
 import com.group12.salonlink.core.navigation.ExploreRoute
 import com.group12.salonlink.core.navigation.MyStyleRoute
 import com.group12.salonlink.core.navigation.RoleShell
+import com.group12.salonlink.domain.model.UserProfile
+import com.group12.salonlink.feature.account.AccountSummary
 
 /** The four customer tabs, in the same order and with the same icons as Figma. */
 private val customerTabs = listOf(
@@ -24,9 +26,11 @@ private val customerTabs = listOf(
 /**
  * Customer home with its bottom navigation.
  * Each placeholder is swapped for the real screen in the phase shown on its badge.
+ *
+ * @param user the signed-in customer (always role CUSTOMER here, guaranteed by SalonLinkRoot).
  */
 @Composable
-fun CustomerShell(onSignOut: () -> Unit) {
+fun CustomerShell(user: UserProfile, onSignOut: () -> Unit) {
     RoleShell(tabs = customerTabs) {
         composable<ExploreRoute> {
             PlaceholderScreen(
@@ -55,13 +59,10 @@ fun CustomerShell(onSignOut: () -> Unit) {
             )
         }
         composable<MyStyleRoute> {
-            PlaceholderScreen(
-                title = stringResource(R.string.style_placeholder_title),
-                message = stringResource(R.string.style_placeholder_message),
-                badge = stringResource(R.string.badge_phase, 9),
-                icon = R.drawable.ic_user_round,
-                actionLabel = stringResource(R.string.sign_out_preview),
-                onAction = onSignOut,
+            AccountSummary(
+                user = user,
+                nextUpNote = stringResource(R.string.style_placeholder_message),
+                onSignOut = onSignOut,
             )
         }
     }

@@ -11,19 +11,16 @@ import kotlinx.serialization.Serializable
  * us, so a typo or a missing argument is a *compile* error instead of a runtime crash.
  *
  * Two levels:
- *  1. Top-level, full-screen destinations (Welcome, Sign in, booking flow...).
+ *  1. Signed-out screens (AuthNavHost).
  *  2. Tabs inside each role's shell (the screens that show a bottom bar).
+ * Which level is visible is decided by SalonLinkRoot from the AuthState, not by routes.
  * =====================================================================================
  */
 
-// ---- 1. Top level ------------------------------------------------------------------
+// ---- 1. Signed out -----------------------------------------------------------------
 @Serializable data object WelcomeRoute
 @Serializable data object SignInRoute
-
-/** Shell = bottom-bar container for one role. Only that role's tabs exist inside it. */
-@Serializable data object CustomerShellRoute
-@Serializable data object StaffShellRoute
-@Serializable data object OwnerShellRoute
+@Serializable data object RegisterRoute
 
 // ---- 2a. Customer tabs (match the Figma bottom navigation) --------------------------
 @Serializable data object ExploreRoute

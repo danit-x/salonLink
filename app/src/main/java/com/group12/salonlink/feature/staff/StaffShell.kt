@@ -11,6 +11,8 @@ import com.group12.salonlink.core.navigation.RoleShell
 import com.group12.salonlink.core.navigation.StaffSalonRoute
 import com.group12.salonlink.core.navigation.StaffTodayRoute
 import com.group12.salonlink.core.navigation.StaffWalkInsRoute
+import com.group12.salonlink.domain.model.UserProfile
+import com.group12.salonlink.feature.account.AccountSummary
 
 private val staffTabs = listOf(
     BottomBarItem(StaffTodayRoute, R.string.tab_today, R.drawable.ic_calendar_days),
@@ -20,7 +22,7 @@ private val staffTabs = listOf(
 
 /** Staff (barber / stylist) home: today's schedule, walk-ins and salon info. */
 @Composable
-fun StaffShell(onSignOut: () -> Unit) {
+fun StaffShell(user: UserProfile, onSignOut: () -> Unit) {
     RoleShell(tabs = staffTabs) {
         composable<StaffTodayRoute> {
             PlaceholderScreen(
@@ -39,13 +41,10 @@ fun StaffShell(onSignOut: () -> Unit) {
             )
         }
         composable<StaffSalonRoute> {
-            PlaceholderScreen(
-                title = stringResource(R.string.staff_salon_placeholder_title),
-                message = stringResource(R.string.staff_salon_placeholder_message),
-                badge = stringResource(R.string.badge_phase, 6),
-                icon = R.drawable.ic_map_pin,
-                actionLabel = stringResource(R.string.sign_out_preview),
-                onAction = onSignOut,
+            AccountSummary(
+                user = user,
+                nextUpNote = stringResource(R.string.staff_salon_placeholder_message),
+                onSignOut = onSignOut,
             )
         }
     }

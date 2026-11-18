@@ -32,6 +32,10 @@ Package name: `com.group12.salonlink` · Project folder: `salonLink/`
 
 **Status 18 Nov 2026:** Firebase project `salonlink-4d991` (Spark). Android app `com.group12.salonlink` registered and `app/google-services.json` in place. Email/Password sign-in enabled. Firestore `(default)` created in **asia-south1 (Mumbai)** in production mode. Firebase CLI 15.36.0 installed. AI Logic **not** enabled (on hold). Android SDK installed at `%LOCALAPPDATA%\Android\Sdk` (platform 37, build-tools 37, emulator, AVD `SalonLink_Pixel`). **Still pending:** `firebase login`.
 
+**Phase 1 status (19 Nov 2026): DONE.** Firebase email sign-in/registration, invite-based STAFF/OWNER roles, role-based root routing, Firestore rules v1 **deployed** to `salonlink-4d991`. 28 unit tests + 19 rules tests pass. Verified end to end on the emulator against the local Firebase emulators (see `firebase/emulator-test-accounts.md`): register → Customer home, wrong password → error, sign-out/sign-in, invited email → Staff home, session restored on relaunch.
+
+> Android 17 note: apps can't reach 10.0.2.2 without ACCESS_LOCAL_NETWORK, so emulator builds use 127.0.0.1 + `adb reverse`.
+
 **Phase 0 status (19 Nov 2026): DONE.** Builds, 6/6 unit tests pass, and it runs on the API 37 emulator: Welcome → Sign-in preview → Customer / Staff / Owner shells.
 
 > Build note for this PC: the Windows `PATH` contains a stray `"` (after `C:\Program Files\nodejs`). It breaks Gradle's unit-test runner (and `cmd.exe` finding `node`). Fix: System Properties → Environment Variables → Path → remove the `"`.

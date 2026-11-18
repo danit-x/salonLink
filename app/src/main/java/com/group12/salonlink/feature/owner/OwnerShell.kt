@@ -12,6 +12,8 @@ import com.group12.salonlink.core.navigation.OwnerSalonRoute
 import com.group12.salonlink.core.navigation.OwnerServicesRoute
 import com.group12.salonlink.core.navigation.OwnerStaffRoute
 import com.group12.salonlink.core.navigation.RoleShell
+import com.group12.salonlink.domain.model.UserProfile
+import com.group12.salonlink.feature.account.AccountSummary
 
 private val ownerTabs = listOf(
     BottomBarItem(OwnerDashboardRoute, R.string.tab_dashboard, R.drawable.ic_compass),
@@ -22,7 +24,7 @@ private val ownerTabs = listOf(
 
 /** Salon owner / manager home: daily dashboard, services, team and salon settings. */
 @Composable
-fun OwnerShell(onSignOut: () -> Unit) {
+fun OwnerShell(user: UserProfile, onSignOut: () -> Unit) {
     RoleShell(tabs = ownerTabs) {
         composable<OwnerDashboardRoute> {
             PlaceholderScreen(
@@ -49,13 +51,10 @@ fun OwnerShell(onSignOut: () -> Unit) {
             )
         }
         composable<OwnerSalonRoute> {
-            PlaceholderScreen(
-                title = stringResource(R.string.owner_salon_placeholder_title),
-                message = stringResource(R.string.owner_salon_placeholder_message),
-                badge = stringResource(R.string.badge_phase, 6),
-                icon = R.drawable.ic_map_pin,
-                actionLabel = stringResource(R.string.sign_out_preview),
-                onAction = onSignOut,
+            AccountSummary(
+                user = user,
+                nextUpNote = stringResource(R.string.owner_salon_placeholder_message),
+                onSignOut = onSignOut,
             )
         }
     }

@@ -29,7 +29,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Developer switch: build with `-Psalonlink.useEmulators=true` to talk to the LOCAL
+            // Firebase emulators (Auth + Firestore) instead of the real project. Safe testing with
+            // throwaway accounts. Off by default, and always off in release builds.
+            val useEmulators = providers.gradleProperty("salonlink.useEmulators").orNull == "true"
+            buildConfigField("boolean", "USE_FIREBASE_EMULATORS", useEmulators.toString())
+        }
         release {
+            buildConfigField("boolean", "USE_FIREBASE_EMULATORS", "false")
             // Shrink + obfuscate the release APK (smaller download, harder to reverse-engineer).
             isMinifyEnabled = true
             isShrinkResources = true

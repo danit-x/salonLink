@@ -1,0 +1,13 @@
+{
+  "name": "salonlink-rules-tests",
+  "private": true,
+  "description": "Automated tests for SalonLink's Firestore security rules (run against the local emulator).",
+  "type": "module",
+  "scripts": {
+    "test": "node --test rules.test.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.4.0"
+  }
+}
