@@ -1,7 +1,11 @@
 package com.group12.salonlink.core.di
 
 import com.group12.salonlink.data.repository.FirebaseAuthRepository
+import com.group12.salonlink.data.repository.FirestoreBookingRepository
+import com.group12.salonlink.data.repository.FirestoreSalonRepository
 import com.group12.salonlink.domain.repository.AuthRepository
+import com.group12.salonlink.domain.repository.BookingRepository
+import com.group12.salonlink.domain.repository.SalonRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,4 +25,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(impl: FirebaseAuthRepository): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSalonRepository(impl: FirestoreSalonRepository): SalonRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBookingRepository(impl: FirestoreBookingRepository): BookingRepository
 }

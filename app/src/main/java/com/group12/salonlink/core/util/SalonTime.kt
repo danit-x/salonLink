@@ -30,6 +30,12 @@ object SalonTime {
     fun toInstant(date: LocalDate, time: LocalTime): Instant =
         ZonedDateTime.of(date, time, SALON_ZONE).toInstant()
 
+    /**
+     * Midnight at the start of [date] in the salon's zone, as a UTC instant.
+     * A day's bookings are those with `startOfDay(d) <= start < startOfDay(d + 1)`.
+     */
+    fun startOfDay(date: LocalDate): Instant = date.atStartOfDay(SALON_ZONE).toInstant()
+
     /** The salon-local date of a stored instant (used to group bookings by day). */
     fun localDateOf(instant: Instant): LocalDate = instant.atZone(SALON_ZONE).toLocalDate()
 

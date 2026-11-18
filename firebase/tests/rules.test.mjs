@@ -15,7 +15,19 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  collectionGroup,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
 let env;
 
@@ -180,11 +192,112 @@ describe("Invites", () => {
   });
 });
 
+// ---------- salon catalogue (v2) ----------
+
+describe("Salon catalogue", () => {
+  beforeEach(async () => {
+    await seed("salons/aura", { name: "Aura Salon" });
+    await seed("salons/aura/services/haircut", { name: "Haircut", durationMin: 30, price: 1500 });
+    await seed("salons/aura/staff/kasun", { name: "Kasun Perera" });
+    await seed("salons/aura/staff/kasun/blocks/lunch", { reason: "Lunch" });
+  });
+
+  test("signed-in users can browse salons, services, staff and blocks", async () => {
+    const db = as("kavindu", "kavindu@example.com");
+    await assertSucceeds(getDoc(doc(db, "salons/aura")));
+    await assertSucceeds(getDocs(collection(db, "salons/aura/services")));
+    await assertSucceeds(getDocs(collection(db, "salons/aura/staff")));
+    await assertSucceeds(getDocs(collection(db, "salons/aura/staff/kasun/blocks")));
+  });
+
+  test("signed-out visitors cannot browse the catalogue", async () => {
+    const db = env.unauthenticatedContext().firestore();
+    await assertFails(getDoc(doc(db, "salons/aura")));
+  });
+
+  test("customers cannot change prices or staff (writes are closed until Phase 6)", async () => {
+    const db = as("kavindu", "kavindu@example.com");
+    await assertFails(setDoc(doc(db, "salons/aura"), { name: "Hacked" }));
+    await assertFails(updateDoc(doc(db, "salons/aura/services/haircut"), { price: 1 }));
+    await assertFails(setDoc(doc(db, "salons/aura/staff/fake"), { name: "Fake Barber" }));
+  });
+});
+
+// ---------- bookings: who can read what (T09) ----------
+
+describe("Reading bookings (T09)", () => {
+  const booking = (customerId, staffId = "kasun") => ({
+    salonId: "aura",
+    customerId,
+    staffId,
+    start: new Date("2026-12-03T12:00:00Z"),
+    status: "BOOKED",
+  });
+
+  beforeEach(async () => {
+    await seed("users/kavindu", { ...customerProfile("kavindu@example.com"), createdAt: new Date() });
+    await seed("users/nimal", { ...customerProfile("nimal@example.com"), createdAt: new Date() });
+    await seed("users/kasun-uid", {
+      ...customerProfile("kasun@aura.lk", { role: "STAFF", salonId: "aura", staffId: "kasun" }),
+      createdAt: new Date(),
+    });
+    await seed("users/other-staff", {
+      ...customerProfile("x@other.lk", { role: "STAFF", salonId: "other-salon", staffId: "x" }),
+      createdAt: new Date(),
+    });
+    await seed("salons/aura/bookings/b1", booking("kavindu"));
+    await seed("salons/aura/bookings/b2", booking("nimal"));
+  });
+
+  test("a customer can read their own booking", async () => {
+    await assertSucceeds(getDoc(doc(as("kavindu", "kavindu@example.com"), "salons/aura/bookings/b1")));
+  });
+
+  test("a customer cannot read another customer's booking", async () => {
+    await assertFails(getDoc(doc(as("kavindu", "kavindu@example.com"), "salons/aura/bookings/b2")));
+  });
+
+  test("'My bookings' (collection group) works when filtered to the caller", async () => {
+    const db = as("kavindu", "kavindu@example.com");
+    await assertSucceeds(
+      getDocs(query(collectionGroup(db, "bookings"), where("customerId", "==", "kavindu"), orderBy("start", "desc"))),
+    );
+  });
+
+  test("a collection-group query for everyone's bookings is refused", async () => {
+    const db = as("kavindu", "kavindu@example.com");
+    await assertFails(getDocs(collectionGroup(db, "bookings")));
+    await assertFails(getDocs(query(collectionGroup(db, "bookings"), where("customerId", "==", "nimal"))));
+  });
+
+  test("salon staff can read the whole day's bookings of their salon", async () => {
+    const db = as("kasun-uid", "kasun@aura.lk");
+    await assertSucceeds(getDocs(query(collection(db, "salons/aura/bookings"), where("staffId", "==", "kasun"))));
+    await assertSucceeds(getDocs(collection(db, "salons/aura/bookings")));
+  });
+
+  test("staff of another salon cannot read this salon's bookings", async () => {
+    const db = as("other-staff", "x@other.lk");
+    await assertFails(getDocs(collection(db, "salons/aura/bookings")));
+  });
+
+  test("a customer cannot list the salon's bookings", async () => {
+    const db = as("kavindu", "kavindu@example.com");
+    await assertFails(getDocs(collection(db, "salons/aura/bookings")));
+  });
+
+  test("nobody can create bookings directly yet (booking engine arrives in Phase 3)", async () => {
+    const db = as("kavindu", "kavindu@example.com");
+    await assertFails(setDoc(doc(db, "salons/aura/bookings/b3"), booking("kavindu")));
+  });
+});
+
 // ---------- default deny ----------
 
 describe("Everything else", () => {
   test("collections without rules are locked", async () => {
     const db = as("kavindu", "kavindu@example.com");
-    await assertFails(setDoc(doc(db, "salons/aura"), { name: "Aura Salon" }));
+    await assertFails(setDoc(doc(db, "secrets/x"), { a: 1 }));
+    await assertFails(getDoc(doc(db, "secrets/x")));
   });
 });

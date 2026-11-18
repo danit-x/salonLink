@@ -23,6 +23,11 @@ class SalonTimeTest {
     }
 
     @Test
+    fun `a salon day starts at Colombo midnight, which is 18 30 UTC the evening before`() {
+        assertEquals(Instant.parse("2026-10-07T18:30:00Z"), SalonTime.startOfDay(date))
+    }
+
+    @Test
     fun `times are formatted like the Figma design`() {
         assertEquals("5:30 pm", SalonTime.formatTime(start))
         assertEquals("Thu, 8 Oct", SalonTime.formatShortDate(start))

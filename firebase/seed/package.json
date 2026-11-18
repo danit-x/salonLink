@@ -1,0 +1,13 @@
+{
+  "name": "salonlink-seed",
+  "private": true,
+  "description": "Loads SalonLink demo data (Aura Salon, its barbers and services) into Firestore.",
+  "type": "module",
+  "scripts": {
+    "seed:emulator": "node seed.mjs --emulator",
+    "seed:live": "node seed.mjs --live"
+  },
+  "dependencies": {
+    "firebase-admin": "14.5.0"
+  }
+}

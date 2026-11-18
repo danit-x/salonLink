@@ -1,7 +1,7 @@
 rules_version = '2';
 
 // =====================================================================================
-// SalonLink — Cloud Firestore security rules (v1: accounts, roles, invites)
+// SalonLink — Cloud Firestore security rules (v2: accounts, roles, invites, catalogue & booking reads)
 // -------------------------------------------------------------------------------------
 // These rules run on Google's servers for EVERY read and write. They are the real
 // security boundary: even a modified app or a raw API call cannot get past them
@@ -31,6 +31,14 @@ service cloud.firestore {
       return signedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && myProfile().role == 'OWNER'
+        && myProfile().salonId == salonId;
+    }
+
+    // STAFF or OWNER of this salon (the people who run it).
+    function isMemberOf(salonId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && myProfile().role in ['STAFF', 'OWNER']
         && myProfile().salonId == salonId;
     }
 
@@ -105,6 +113,41 @@ service cloud.firestore {
         && email == email.lower();
 
       allow delete: if isOwnerOf(resource.data.salonId);
+    }
+
+    // ---------- salons/{salonId} and its catalogue (v2, Phase 2) ----------
+    // Any signed-in user may browse salons, services, staff and staff blocks: customers need
+    // them to choose and book (availability needs the staff blocks too). Writes stay closed until the owner screens (Phase 6) add rules for them;
+    // until then the seed script writes with admin access.
+    match /salons/{salonId} {
+      allow read: if signedIn();
+
+      match /services/{serviceId} {
+        allow read: if signedIn();
+      }
+
+      match /staff/{staffId} {
+        allow read: if signedIn();
+
+        match /blocks/{blockId} {
+          allow read: if signedIn();
+        }
+      }
+
+      // Bookings: salon staff/owners see every booking of THEIR salon; a customer sees only
+      // their own (T09). Creating/cancelling arrives with the booking engine (Phase 3).
+      match /bookings/{bookingId} {
+        allow read: if isMemberOf(salonId)
+          || (signedIn() && resource.data.customerId == request.auth.uid);
+      }
+    }
+
+    // "My bookings" searches every salon's bookings at once (a collection-group query).
+    // WHY this extra rule: collection-group queries are checked against a `{path=**}` match.
+    // Firestore only allows the query if the rule holds for EVERY possible result, so the
+    // app must filter on customerId == the caller's uid, or the whole query is refused.
+    match /{path=**}/bookings/{bookingId} {
+      allow read: if signedIn() && resource.data.customerId == request.auth.uid;
     }
 
     // Everything else stays locked until later phases add rules for it.

@@ -25,9 +25,18 @@ Use the local emulators to create and delete throwaway accounts without touching
    ./gradlew installDebug -Psalonlink.useEmulators=true
    ```
 
+4. Load the demo data (Aura Salon, Kasun & Nadeesha, 4 services, lunch blocks, test invites).
+   Run it again after every emulator restart, since the emulator starts empty:
+
+   ```
+   npm --prefix firebase/seed install
+   npm --prefix firebase/seed run seed:emulator
+   ```
+
 ## Test accounts
 
 | Role     | Email                        | Password         | How it gets its role |
 |----------|------------------------------|------------------|----------------------|
 | Customer | customer.test@salonlink.test | Customer!Test123 | Self-registered (default role) |
-| Staff    | staff.test@salonlink.test    | Staff!Test123    | Needs `invites/staff.test@salonlink.test` = `{role: STAFF, salonId: aura, staffId: kasun}` before registering |
+| Staff    | staff.test@salonlink.test    | Staff!Test123    | Invite `{role: STAFF, salonId: aura, staffId: kasun}` created by the seed script; register after seeding |
+| Owner    | owner.test@salonlink.test    | Owner!Test123    | Invite `{role: OWNER, salonId: aura}` created by the seed script; register after seeding |
