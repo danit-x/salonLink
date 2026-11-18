@@ -1,0 +1,11 @@
+# Consistent line endings for every teammate, whatever their OS.
+* text=auto eol=lf
+
+# Windows scripts need CRLF.
+*.bat text eol=crlf
+
+# Never touch binary files.
+*.jar binary
+*.ttf binary
+*.png binary
+*.jpg binary

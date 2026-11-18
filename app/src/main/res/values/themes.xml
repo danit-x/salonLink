@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The app is 100% Jetpack Compose, so this XML theme only matters for the first frames:
+        the Android 12+ splash screen (core-splashscreen also back-ports it to API 26+).
+        After launch, MainActivity switches to Theme.SalonLink and Compose draws everything.
+    -->
+    <style name="Theme.SalonLink.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/salon_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.SalonLink</item>
+    </style>
+
+    <style name="Theme.SalonLink" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/salon_background</item>
+    </style>
+</resources>

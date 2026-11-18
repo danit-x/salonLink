@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from the SalonLink Figma file (Lucide-style stroke icon). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="19dp"
+    android:height="19dp"
+    android:viewportWidth="19"
+    android:viewportHeight="19">
+    <path
+        android:pathData="M6.33333 1.5827V4.74962M12.6667 1.5827V4.74962M2.375 7.91654H16.625M6.33333 11.0835H6.34125M9.5 11.0835H9.50792M12.6667 11.0835H12.6746M6.33333 14.2504H6.34125M9.5 14.2504H9.50792M12.6667 14.2504H12.6746M3.95833 3.16616H15.0417C15.9161 3.16616 16.625 3.8751 16.625 4.74962V15.8338C16.625 16.7084 15.9161 17.4173 15.0417 17.4173H3.95833C3.08388 17.4173 2.375 16.7084 2.375 15.8338V4.74962C2.375 3.8751 3.08388 3.16616 3.95833 3.16616Z"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

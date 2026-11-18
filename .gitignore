@@ -1,0 +1,30 @@
+# --- Build output ---
+.gradle/
+.kotlin/
+build/
+**/build/
+captures/
+*.apk
+*.aab
+
+# --- IDE ---
+.idea/
+*.iml
+.DS_Store
+
+# --- Local machine config (contains the SDK path) ---
+local.properties
+
+# --- Secrets: never commit these ---
+# Firebase client config. Not a password, but it identifies our project, so keep the repo clean.
+# Each team member downloads it from the Firebase console (Project settings → Your apps).
+app/google-services.json
+# Admin SDK key used only by the seed script.
+firebase/seed/service-account*.json
+
+# --- Firebase CLI / emulator ---
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+firebase/**/node_modules/

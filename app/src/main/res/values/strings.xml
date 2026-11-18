@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    All user-facing text lives here (never hard-coded in Kotlin).
+    WHY: it lets us add Sinhala (values-si) and Tamil (values-ta) translations later, as the
+    Figma "My Style Profile" language switch shows, without touching any screen code.
+-->
+<resources>
+    <string name="app_name">SalonLink</string>
+
+    <!-- Accessibility (TalkBack) descriptions -->
+    <string name="cd_back">Back</string>
+
+    <!-- Welcome -->
+    <string name="welcome_eyebrow">Intelligent salon booking</string>
+    <string name="welcome_headline">Good hair.\nGood energy.</string>
+    <string name="welcome_body">Book your barber in three taps, see the live queue and keep your style notes in one place.</string>
+    <string name="welcome_create_account">Create an account</string>
+    <string name="welcome_sign_in">I already have an account</string>
+    <string name="welcome_footer">EC5208 · Group 12 · University of Ruhuna</string>
+
+    <!-- Sign-in placeholder (Phase 0 only — replaced by Firebase Auth in Phase 1) -->
+    <string name="signin_title">Sign in</string>
+    <string name="signin_placeholder_title">Secure sign-in is next</string>
+    <string name="signin_placeholder_message">Firebase email sign-in with role-based access arrives in Phase 1. For now, preview each role\'s navigation.</string>
+    <string name="signin_preview_label">Preview the app as</string>
+    <string name="role_customer">Customer</string>
+    <string name="role_staff">Staff member</string>
+    <string name="role_owner">Salon owner</string>
+    <string name="sign_out_preview">Sign out (preview)</string>
+
+    <!-- Phase badges -->
+    <string name="badge_phase">Coming in Phase %1$d</string>
+    <string name="badge_on_hold">Future release</string>
+
+    <!-- Customer tabs -->
+    <string name="tab_explore">Explore</string>
+    <string name="tab_bookings">Bookings</string>
+    <string name="tab_concierge">Concierge</string>
+    <string name="tab_my_style">My style</string>
+
+    <string name="explore_placeholder_title">Discover your next great cut</string>
+    <string name="explore_placeholder_message">Salons, barbers, categories and your upcoming appointment, built from the Figma Discovery screen.</string>
+    <string name="bookings_placeholder_title">Your bookings</string>
+    <string name="bookings_placeholder_message">Upcoming visits, booking history and free cancellation.</string>
+    <string name="concierge_on_hold_title">Your salon concierge is on its way</string>
+    <string name="concierge_on_hold_message">Booking by chat (\"a haircut tomorrow after 5\") will arrive in a later release. Until then, booking from Explore takes three taps.</string>
+    <string name="style_placeholder_title">My style profile</string>
+    <string name="style_placeholder_message">Your hair notes, moodboard photos and favourite barber, shared only with your consent.</string>
+
+    <!-- Staff tabs -->
+    <string name="tab_today">Today</string>
+    <string name="tab_walk_ins">Walk-ins</string>
+    <string name="tab_salon">Salon</string>
+    <string name="staff_today_placeholder_title">Today\'s schedule</string>
+    <string name="staff_today_placeholder_message">Your appointments in time order, with one-tap status updates: checked in, in service, completed.</string>
+    <string name="staff_walkin_placeholder_title">Walk-in customers</string>
+    <string name="staff_walkin_placeholder_message">Add a walk-in guest and slot them into the live queue next to booked customers.</string>
+    <string name="staff_salon_placeholder_title">Salon info</string>
+    <string name="staff_salon_placeholder_message">Your working hours and salon details.</string>
+
+    <!-- Owner tabs -->
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_services">Services</string>
+    <string name="tab_staff">Staff</string>
+    <string name="owner_dashboard_placeholder_title">Today at a glance</string>
+    <string name="owner_dashboard_placeholder_message">Bookings, completed services, walk-ins and revenue for the day.</string>
+    <string name="owner_services_placeholder_title">Services &amp; prices</string>
+    <string name="owner_services_placeholder_message">Add, edit and retire services with their duration, price and staff.</string>
+    <string name="owner_staff_placeholder_title">Your team</string>
+    <string name="owner_staff_placeholder_message">Invite staff, set working hours and block time off.</string>
+    <string name="owner_salon_placeholder_title">Salon details</string>
+    <string name="owner_salon_placeholder_message">Name, address, phone and opening hours.</string>
+</resources>

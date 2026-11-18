@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Only used by XML (splash + launcher). Compose colours live in core/designsystem/theme/Color.kt -->
+    <color name="salon_background">#FFFFFDF8</color>
+    <color name="salon_gradient_start">#FF7E91F0</color>
+    <color name="salon_gradient_mid">#FF596DE1</color>
+    <color name="salon_gradient_end">#FF8060D3</color>
+</resources>
