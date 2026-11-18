@@ -32,6 +32,8 @@ Package name: `com.group12.salonlink` · Project folder: `salonLink/`
 
 **Status 18 Nov 2026:** Firebase project `salonlink-4d991` (Spark). Android app `com.group12.salonlink` registered and `app/google-services.json` in place. Email/Password sign-in enabled. Firestore `(default)` created in **asia-south1 (Mumbai)** in production mode. Firebase CLI 15.36.0 installed. AI Logic **not** enabled (on hold). Android SDK installed at `%LOCALAPPDATA%\Android\Sdk` (platform 37, build-tools 37, emulator, AVD `SalonLink_Pixel`). **Still pending:** `firebase login`.
 
+**Phase 3 status (19 Nov 2026): DONE (engine + rules; no UI yet).** `SlotGrid` (10-min slots numbered from the epoch), pure `AvailabilityCalculator` (salon ∩ barber hours, blocks, taken slots, past), `ObserveAvailabilityUseCase`, `CreateBookingUseCase` (idempotent by client UUID), `CancelBookingUseCase`, Firestore transactions in `FirestoreBookingRepository`, rules v3 with the slot-lock "domino chain" + status table, `slotLocks` index. 80 unit tests + 53 rules tests pass (incl. T03 race, tampered client skipping a lock, T11 retry). **Not yet verified:** the real Firestore transaction on a device (Phase 4 UI will exercise it) and Firestore's 20-document rules limit for 16-slot bookings (the emulator does not enforce that limit). Rules v3 + index **not deployed yet**.
+
 **Phase 2 status (19 Nov 2026): DONE.** Domain models (Salon, WeeklyHours, SalonService, Staff, StaffBlock, Booking, BookingStatus with its transition table), `SalonRepository` + `BookingRepository` (read side, live Flows) with Firestore implementations and mappers, Firestore rules v2 (catalogue readable by signed-in users; bookings readable only by their customer or the salon's staff/owner, incl. the "My bookings" collection-group query), composite indexes, and `firebase/seed/seed.mjs` (Aura Salon, Kasun Perera + Nadeesha Fernando, the 4 Figma services, lunch blocks, owner/staff invites). 53 unit tests + 30 rules tests pass; seed verified on the local emulator. Booking writes are Phase 3. Rules v2 + indexes **deployed** to `salonlink-4d991` (19 Nov 2026). **Pending:** seed the live project (needs a service-account key + the owner's email).
 
 **Phase 1 status (19 Nov 2026): DONE.** Firebase email sign-in/registration, invite-based STAFF/OWNER roles, role-based root routing, Firestore rules v1 **deployed** to `salonlink-4d991`. 28 unit tests + 19 rules tests pass. Verified end to end on the emulator against the local Firebase emulators (see `firebase/emulator-test-accounts.md`): register → Customer home, wrong password → error, sign-out/sign-in, invited email → Staff home, session restored on relaunch.
@@ -114,7 +116,7 @@ salons/{salonId}                name, address, phone, openingHours
   /bookings/{id}                customerId, customerName, staffId, staffName, services[snapshot],
                                 start, end, totalPrice, status, type(APPOINTMENT|WALK_IN),
                                 createdAt, updatedAt, checkedInAt?
-  /slotLocks/{staffId_yyyyMMdd_HHmm}   bookingId                     (anti-double-booking, §5)
+  /slotLocks/{staffId}_{slot}   bookingId, staffId, slot             (anti-double-booking, §5)
   /waitlist/{id}                customerId, serviceIds, staffId?, date, windowStart, windowEnd,
                                 status(WAITING|OFFERED|ACCEPTED|EXPIRED), offer{start,end,expiresAt}
 staffInvites/{email}            salonId, staffId   (owner invites staff; rules allow role=STAFF on signup)
@@ -126,14 +128,15 @@ staffInvites/{email}            salonId, staffId   (owner invites staff; rules a
 
 ## 5. Booking engine — how double-booking is prevented without Cloud Functions
 
-1. The calendar is split into **10-minute slots**. A 50-minute booking at 17:30 occupies 5 slots.
+1. The calendar is split into **10-minute slots**, numbered as minutes-since-1970 ÷ 10 (`SlotGrid`). A 50-minute booking at 17:30 occupies 5 slots. Max booking = 16 slots (rules read limit).
 2. `CreateBookingUseCase` runs **one Firestore transaction**:
    - reads every `slotLocks/{staff_date_time}` doc for the interval → if any exists → `SlotTakenException`;
    - re-validates working hours and blocks;
    - writes the booking doc + all slot-lock docs atomically.
 3. Two phones booking the same slot at once → Firestore retries one transaction, which then sees the locks and fails. This gives **at most one booking** (T03, NFR-03).
 4. **Idempotency:** the booking ID is a client-generated UUID created once per confirm screen, so a retry after a network drop rewrites the same doc and never creates a duplicate (T11).
-5. **Security rules** use `getAfter()`/`existsAfter()` so a slot lock can only be created together with its booking, and only by the booking's customer or salon staff. This stops a malicious client from skipping the engine.
+5. **Security rules** use `getAfter()`/`existsAfter()` as a *domino chain*: a booking needs its first lock in the same write, each lock needs the next one, up to the last slot. Locks have no update rule, so an existing lock can't be overwritten. A hacked client can't skip the engine.
+   Customers see availability by reading the anonymous `slotLocks` (no names), never other people's bookings (T09). Working hours/blocks are checked client-side just before the transaction (rules can't evaluate them cheaply); a block added in that same instant is a documented race.
 6. Cancel deletes the locks in the same transaction, then runs `OfferFreedSlotUseCase` (waitlist, P2).
 
 ---

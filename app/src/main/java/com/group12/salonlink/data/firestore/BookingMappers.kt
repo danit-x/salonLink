@@ -2,6 +2,8 @@ package com.group12.salonlink.data.firestore
 
 import com.group12.salonlink.data.firestore.FirestoreSchema.BookedServiceFields
 import com.group12.salonlink.data.firestore.FirestoreSchema.BookingFields
+import com.group12.salonlink.data.firestore.FirestoreSchema.SlotLockFields
+import com.group12.salonlink.domain.booking.SlotGrid
 import com.group12.salonlink.domain.model.BookedService
 import com.group12.salonlink.domain.model.Booking
 import com.group12.salonlink.domain.model.BookingStatus
@@ -26,11 +28,25 @@ fun Booking.toFirestoreMap(): Map<String, Any?> = mapOf(
     BookingFields.SERVICES to services.map { it.toFirestoreMap() },
     BookingFields.START to start.toTimestamp(),
     BookingFields.END to end.toTimestamp(),
+    // WHY store slot numbers too: the security rules can't convert dates into slots cheaply,
+    // but they CAN check `start == startSlot × 10 min` and then walk the locks slot by slot.
+    BookingFields.START_SLOT to slots.first,
+    BookingFields.END_SLOT to slots.last + 1,
     BookingFields.TOTAL_PRICE to totalPrice,
     BookingFields.STATUS to status.name,
     BookingFields.TYPE to type.name,
     BookingFields.NOTE to note,
     BookingFields.CHECKED_IN_AT to checkedInAt?.toTimestamp(),
+)
+
+/** The 10-minute slots this booking holds, e.g. 17:30–18:20 → 5 slots. */
+val Booking.slots: LongRange get() = SlotGrid.slotsBetween(start, end)
+
+/** The lock document for one slot of this booking. */
+fun Booking.lockData(slot: Long): Map<String, Any> = mapOf(
+    SlotLockFields.BOOKING_ID to id,
+    SlotLockFields.STAFF_ID to staffId,
+    SlotLockFields.SLOT to slot,
 )
 
 fun BookedService.toFirestoreMap(): Map<String, Any?> = mapOf(

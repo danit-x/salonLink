@@ -8,6 +8,7 @@
 // Run from the project root:
 //   firebase emulators:exec --only firestore --project demo-salonlink "npm --prefix firebase/tests test"
 // =====================================================================================
+import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { after, before, beforeEach, describe, test } from "node:test";
 import {
@@ -18,6 +19,7 @@ import {
 import {
   collection,
   collectionGroup,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -27,6 +29,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 
 let env;
@@ -286,9 +289,208 @@ describe("Reading bookings (T09)", () => {
     await assertFails(getDocs(collection(db, "salons/aura/bookings")));
   });
 
-  test("nobody can create bookings directly yet (booking engine arrives in Phase 3)", async () => {
+  test("a booking written without its slot locks is refused", async () => {
     const db = as("kavindu", "kavindu@example.com");
     await assertFails(setDoc(doc(db, "salons/aura/bookings/b3"), booking("kavindu")));
+  });
+});
+
+// ---------- the booking engine: slot locks (Phase 3, T02 / T03 / T11) ----------
+
+describe("Booking engine (slot locks)", () => {
+  const SLOT_MS = 10 * 60 * 1000;
+  // 3 Dec 2026, 17:30 Colombo = 12:00 UTC. Far enough in the future for "start > now".
+  const START = new Date("2026-12-03T12:00:00Z");
+  const START_SLOT = START.getTime() / SLOT_MS;
+
+  /** A valid booking document for `slots` 10-minute slots starting at START + offset. */
+  const bookingDoc = ({ customerId = "kavindu", slots = 5, offset = 0, type = "APPOINTMENT" } = {}) => {
+    const startSlot = START_SLOT + offset;
+    return {
+      salonId: "aura",
+      customerId,
+      customerName: "Kavindu Perera",
+      staffId: "kasun",
+      staffName: "Kasun Perera",
+      services: [{ serviceId: "haircut", name: "Haircut", durationMin: slots * 10, price: 1500 }],
+      start: new Date(startSlot * SLOT_MS),
+      end: new Date((startSlot + slots) * SLOT_MS),
+      startSlot,
+      endSlot: startSlot + slots,
+      totalPrice: 1500,
+      status: "BOOKED",
+      type,
+      note: null,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      checkedInAt: null,
+    };
+  };
+
+  const lockId = (slot) => `kasun_${slot}`;
+
+  /**
+   * Writes the booking and its locks atomically, like the app's transaction does.
+   * `skip` = slot numbers whose lock we "forget" (to imitate a tampered client).
+   */
+  const book = (db, id, data, { skip = [] } = {}) => {
+    const batch = writeBatch(db);
+    batch.set(doc(db, `salons/aura/bookings/${id}`), data);
+    for (let s = data.startSlot; s < data.endSlot; s++) {
+      if (skip.includes(s)) continue;
+      batch.set(doc(db, `salons/aura/slotLocks/${lockId(s)}`), { bookingId: id, staffId: "kasun", slot: s });
+    }
+    return batch.commit();
+  };
+
+  /** Cancels like the app: status → CANCELLED and delete the locks, in one write. */
+  const cancel = (db, id, data) => {
+    const batch = writeBatch(db);
+    batch.update(doc(db, `salons/aura/bookings/${id}`), { status: "CANCELLED", updatedAt: serverTimestamp() });
+    for (let s = data.startSlot; s < data.endSlot; s++) batch.delete(doc(db, `salons/aura/slotLocks/${lockId(s)}`));
+    return batch.commit();
+  };
+
+  const kavindu = () => as("kavindu", "kavindu@example.com");
+  const nimal = () => as("nimal", "nimal@example.com");
+  const kasunStaff = () => as("kasun-uid", "kasun@aura.lk");
+
+  beforeEach(async () => {
+    await seed("salons/aura", { name: "Aura Salon" });
+    await seed("salons/aura/staff/kasun", { name: "Kasun Perera" });
+    await seed("users/kavindu", { ...customerProfile("kavindu@example.com"), createdAt: new Date() });
+    await seed("users/nimal", { ...customerProfile("nimal@example.com"), createdAt: new Date() });
+    await seed("users/kasun-uid", {
+      ...customerProfile("kasun@aura.lk", { role: "STAFF", salonId: "aura", staffId: "kasun" }),
+      createdAt: new Date(),
+    });
+  });
+
+  test("T02: a customer can book with all slot locks", async () => {
+    await assertSucceeds(book(kavindu(), "b1", bookingDoc()));
+  });
+
+  test("anyone signed in can read which slots are taken (but not whose)", async () => {
+    await book(kavindu(), "b1", bookingDoc());
+    const db = nimal();
+    await assertSucceeds(
+      getDocs(query(collection(db, "salons/aura/slotLocks"), where("staffId", "==", "kasun"), where("slot", ">=", START_SLOT))),
+    );
+    await assertFails(getDoc(doc(db, "salons/aura/bookings/b1")));
+  });
+
+  test("T03: a second booking overlapping a taken slot is refused", async () => {
+    await book(kavindu(), "b1", bookingDoc());
+    // Nimal tries 17:50–18:20, which overlaps Kavindu's 17:30–18:20.
+    await assertFails(book(nimal(), "b2", bookingDoc({ customerId: "nimal", offset: 2, slots: 3 })));
+  });
+
+  test("T03: two customers racing for the same slot → exactly one wins", async () => {
+    const results = await Promise.allSettled([
+      book(kavindu(), "race-a", bookingDoc()),
+      book(nimal(), "race-b", bookingDoc({ customerId: "nimal" })),
+    ]);
+    assert.equal(results.filter((r) => r.status === "fulfilled").length, 1);
+  });
+
+  test("the next booking may start exactly when the previous one ends", async () => {
+    await book(kavindu(), "b1", bookingDoc());
+    await assertSucceeds(book(nimal(), "b2", bookingDoc({ customerId: "nimal", offset: 5, slots: 3 })));
+  });
+
+  test("a tampered client that skips a middle lock is refused (domino chain)", async () => {
+    await assertFails(book(kavindu(), "b1", bookingDoc(), { skip: [START_SLOT + 2] }));
+  });
+
+  test("a tampered client that skips the last lock is refused", async () => {
+    await assertFails(book(kavindu(), "b1", bookingDoc(), { skip: [START_SLOT + 4] }));
+  });
+
+  test("a lock can't be created on its own, without its booking", async () => {
+    const db = kavindu();
+    await assertFails(
+      setDoc(doc(db, `salons/aura/slotLocks/${lockId(START_SLOT)}`), { bookingId: "ghost", staffId: "kasun", slot: START_SLOT }),
+    );
+  });
+
+  test("a customer cannot book on someone else's behalf", async () => {
+    await assertFails(book(kavindu(), "b1", bookingDoc({ customerId: "nimal" })));
+  });
+
+  test("a customer cannot book in the past", async () => {
+    const past = { ...bookingDoc(), start: new Date("2020-01-01T00:00:00Z") };
+    past.startSlot = past.start.getTime() / SLOT_MS;
+    past.endSlot = past.startSlot + 5;
+    past.end = new Date(past.endSlot * SLOT_MS);
+    await assertFails(book(kavindu(), "b1", past));
+  });
+
+  test("a start time off the 10-minute grid is refused", async () => {
+    const odd = { ...bookingDoc(), start: new Date(START.getTime() + 60_000) };
+    await assertFails(book(kavindu(), "b1", odd));
+  });
+
+  test("a customer cannot create a booking that is already CHECKED_IN", async () => {
+    await assertFails(book(kavindu(), "b1", { ...bookingDoc(), status: "CHECKED_IN" }));
+  });
+
+  test("the longest allowed booking (16 slots) fits Firestore's 20-document rules limit", async () => {
+    await assertSucceeds(book(kavindu(), "long", bookingDoc({ slots: 16 })));
+  });
+
+  test("bookings longer than 16 slots are refused", async () => {
+    await assertFails(book(kavindu(), "too-long", bookingDoc({ slots: 17 })));
+  });
+
+  test("T11: checking whether a booking id exists is allowed before it's written", async () => {
+    await assertSucceeds(getDoc(doc(kavindu(), "salons/aura/bookings/not-yet")));
+  });
+
+  test("staff can add a walk-in for someone without an account", async () => {
+    await assertSucceeds(book(kasunStaff(), "w1", bookingDoc({ customerId: null, type: "WALK_IN" })));
+  });
+
+  test("a customer cannot create a WALK_IN", async () => {
+    await assertFails(book(kavindu(), "w1", bookingDoc({ type: "WALK_IN" })));
+  });
+
+  test("a customer can cancel their own booking, which frees the slots", async () => {
+    const data = bookingDoc();
+    await book(kavindu(), "b1", data);
+    await assertSucceeds(cancel(kavindu(), "b1", data));
+    // The time is free again: Nimal can take it.
+    await assertSucceeds(book(nimal(), "b2", bookingDoc({ customerId: "nimal" })));
+  });
+
+  test("a customer cannot cancel someone else's booking", async () => {
+    const data = bookingDoc();
+    await book(kavindu(), "b1", data);
+    await assertFails(cancel(nimal(), "b1", data));
+  });
+
+  test("locks cannot be deleted while the booking is still active", async () => {
+    await book(kavindu(), "b1", bookingDoc());
+    await assertFails(deleteDoc(doc(kavindu(), `salons/aura/slotLocks/${lockId(START_SLOT)}`)));
+  });
+
+  test("a customer cannot change the time or price of an existing booking", async () => {
+    await book(kavindu(), "b1", bookingDoc());
+    await assertFails(updateDoc(doc(kavindu(), "salons/aura/bookings/b1"), { totalPrice: 1, updatedAt: serverTimestamp() }));
+  });
+
+  test("a customer cannot cancel after check-in; staff can move the status along", async () => {
+    const data = bookingDoc();
+    await book(kavindu(), "b1", data);
+    const ref = (db) => doc(db, "salons/aura/bookings/b1");
+    await assertSucceeds(updateDoc(ref(kasunStaff()), { status: "CHECKED_IN", checkedInAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref(kavindu()), { status: "CANCELLED", updatedAt: serverTimestamp() }));
+    // Not allowed by the status table: CHECKED_IN → COMPLETED skips IN_SERVICE.
+    await assertFails(updateDoc(ref(kasunStaff()), { status: "COMPLETED", updatedAt: serverTimestamp() }));
+  });
+
+  test("bookings can never be deleted", async () => {
+    await book(kavindu(), "b1", bookingDoc());
+    await assertFails(deleteDoc(doc(kasunStaff(), "salons/aura/bookings/b1")));
   });
 });
 

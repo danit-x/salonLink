@@ -14,7 +14,8 @@ package com.group12.salonlink.data.firestore
  *   ├─ services/{serviceId}
  *   ├─ staff/{staffId}
  *   │    └─ blocks/{blockId}
- *   └─ bookings/{bookingId}
+ *   ├─ bookings/{bookingId}
+ *   └─ slotLocks/{staffId}_{slot}     one per 10-minute slot a booking holds (Phase 3)
  * ```
  */
 object FirestoreSchema {
@@ -27,6 +28,10 @@ object FirestoreSchema {
     const val STAFF = "staff"         // sub-collection of salons/{id}
     const val BLOCKS = "blocks"       // sub-collection of salons/{id}/staff/{id}
     const val BOOKINGS = "bookings"   // sub-collection of salons/{id}; also queried as a collection group
+    const val SLOT_LOCKS = "slotLocks" // sub-collection of salons/{id}
+
+    /** Lock document id, e.g. "kasun_2982528". MUST match lockPath() in firestore.rules. */
+    fun slotLockId(staffId: String, slot: Long): String = "${staffId}_$slot"
 
     // --- users/{uid} fields ---
     object UserFields {
@@ -97,6 +102,8 @@ object FirestoreSchema {
         const val SERVICES = "services"             // list of BookedServiceFields maps
         const val START = "start"
         const val END = "end"
+        const val START_SLOT = "startSlot"          // SlotGrid slot of `start` (rules check the locks with it)
+        const val END_SLOT = "endSlot"              // first slot AFTER the booking (exclusive)
         const val TOTAL_PRICE = "totalPrice"
         const val STATUS = "status"
         const val TYPE = "type"
@@ -112,5 +119,12 @@ object FirestoreSchema {
         const val NAME = "name"
         const val DURATION_MIN = "durationMin"
         const val PRICE = "price"
+    }
+
+    // --- salons/{id}/slotLocks/{staffId}_{slot} fields ---
+    object SlotLockFields {
+        const val BOOKING_ID = "bookingId"
+        const val STAFF_ID = "staffId"
+        const val SLOT = "slot"
     }
 }

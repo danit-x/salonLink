@@ -134,11 +134,146 @@ service cloud.firestore {
         }
       }
 
-      // Bookings: salon staff/owners see every booking of THEIR salon; a customer sees only
-      // their own (T09). Creating/cancelling arrives with the booking engine (Phase 3).
+      // ---------- Bookings + slot locks: the booking engine (v3, Phase 3, PLAN.md §5) ----------
+      //
+      // HOW DOUBLE-BOOKING IS MADE IMPOSSIBLE (even for a hacked app):
+      //  1. Every booking holds one lock document per 10-minute slot it covers:
+      //       slotLocks/{staffId}_{slot}   (slot = minutes since 1970 / 10, see SlotGrid.kt)
+      //  2. A document id is unique. Writing a lock that already exists is an UPDATE, and
+      //     locks have no update rule, so a second booking for the same slot is always refused.
+      //  3. A booking can only be created if its FIRST lock is written with it, and every lock
+      //     can only be written if the NEXT one is written with it, up to the last slot.
+      //     So, like a row of dominoes, a booking without ALL its locks is refused.
+      //
+      // WHY the domino chain: rules have no loops, so "check every slot" can't be written
+      // directly. Firestore also lets one transaction's rules read at most 20 documents: a
+      // booking reads up to 16 locks + the booking + the staff doc + the caller's profile = 19.
+      // Hence MAX_SLOTS = 16 (2 h 40 min).
+
+      function maxSlots() { return 16; }              // MUST match SlotGrid.MAX_SLOTS
+      function slotMillis() { return 600000; }       // 10 minutes in milliseconds
+
+      function bookingPath(bookingId) {
+        return /databases/$(database)/documents/salons/$(salonId)/bookings/$(bookingId);
+      }
+
+      function lockPath(staffId, slot) {
+        return /databases/$(database)/documents/salons/$(salonId)/slotLocks/$(staffId + '_' + string(slot));
+      }
+
+      // The lock for `slot` exists after this write and belongs to booking `bookingId`.
+      function lockHeldAfter(staffId, slot, bookingId) {
+        return existsAfter(lockPath(staffId, slot))
+          && getAfter(lockPath(staffId, slot)).data.bookingId == bookingId;
+      }
+
+      // Allowed status changes. MUST match BookingStatus.nextStatuses in Booking.kt.
+      function nextStatuses() {
+        return {
+          'BOOKED': ['CHECKED_IN', 'IN_SERVICE', 'CANCELLED', 'MISSED'],
+          'CHECKED_IN': ['WAITING', 'IN_SERVICE', 'CANCELLED'],
+          'WAITING': ['IN_SERVICE', 'CANCELLED'],
+          'IN_SERVICE': ['COMPLETED'],
+          'COMPLETED': [], 'CANCELLED': [], 'MISSED': []
+        };
+      }
+
+      // Shape and arithmetic of a new booking.
+      function validNewBooking(bookingId, b) {
+        return b.keys().hasOnly(['salonId', 'customerId', 'customerName', 'staffId', 'staffName',
+                                 'services', 'start', 'end', 'startSlot', 'endSlot', 'totalPrice',
+                                 'status', 'type', 'note', 'createdAt', 'updatedAt', 'checkedInAt'])
+          && b.salonId == salonId
+          && b.status == 'BOOKED'
+          && b.get('checkedInAt', null) == null
+          && b.customerName is string && b.customerName.size() > 0 && b.customerName.size() <= 60
+          && b.staffName is string && b.staffName.size() <= 60
+          && b.services is list && b.services.size() > 0 && b.services.size() <= 5
+          && b.totalPrice is int && b.totalPrice >= 0
+          && optionalString(b, 'note', 200)
+          && b.createdAt == request.time && b.updatedAt == request.time
+          // Slot arithmetic: start is exactly on startSlot; end falls inside the last slot.
+          && b.startSlot is int && b.endSlot is int
+          && b.endSlot > b.startSlot && b.endSlot - b.startSlot <= maxSlots()
+          && b.start.toMillis() == b.startSlot * slotMillis()
+          && b.end.toMillis() > (b.endSlot - 1) * slotMillis()
+          && b.end.toMillis() <= b.endSlot * slotMillis()
+          // The barber exists in this salon.
+          && exists(/databases/$(database)/documents/salons/$(salonId)/staff/$(b.staffId))
+          // First domino: the first slot is locked for THIS booking in the same write.
+          && lockHeldAfter(b.staffId, b.startSlot, bookingId);
+      }
+
+      // Who may create it: a customer books for THEMSELVES, in the future. Salon staff/owners
+      // may book for anyone (phone bookings) and add walk-ins that started in the current slot.
+      function mayCreateBooking(b) {
+        return (b.type == 'APPOINTMENT'
+                  && signedIn() && b.customerId == request.auth.uid
+                  && b.start > request.time)
+          || (b.type in ['APPOINTMENT', 'WALK_IN']
+                  && isMemberOf(salonId)
+                  && b.end > request.time);
+      }
+
+      // Salon staff/owners see every booking of THEIR salon; a customer sees only their own (T09).
       match /bookings/{bookingId} {
-        allow read: if isMemberOf(salonId)
+        // `resource == null`: reading a booking id that doesn't exist yet reveals nothing, and the
+        // engine needs it for its idempotency check ("was this booking already saved?").
+        allow get: if resource == null
+          || isMemberOf(salonId)
           || (signedIn() && resource.data.customerId == request.auth.uid);
+        allow list: if isMemberOf(salonId)
+          || (signedIn() && resource.data.customerId == request.auth.uid);
+
+        allow create: if validNewBooking(bookingId, request.resource.data)
+          && mayCreateBooking(request.resource.data);
+
+        // Customers may only cancel their own booking, and only before check-in.
+        // Staff/owners may move it along the status table (check-in, start, complete, no-show…).
+        allow update: if request.resource.data.updatedAt == request.time
+          && request.resource.data.status in nextStatuses()[resource.data.status]
+          && (
+            (signedIn() && resource.data.customerId == request.auth.uid
+               && resource.data.status == 'BOOKED'
+               && request.resource.data.status == 'CANCELLED'
+               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
+            || (isMemberOf(salonId)
+               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'checkedInAt']))
+          );
+
+        // Bookings are history: never deleted, only CANCELLED / MISSED.
+        allow delete: if false;
+      }
+
+      function lockIsPartOfBooking(lock, b) {
+        return b.staffId == lock.staffId
+          && b.status == 'BOOKED'
+          && b.startSlot <= lock.slot && lock.slot < b.endSlot
+          && (lock.slot + 1 == b.endSlot || lockHeldAfter(lock.staffId, lock.slot + 1, lock.bookingId));
+      }
+
+      match /slotLocks/{lockId} {
+        // Locks hold no personal data (just ids), so any signed-in user may read them to see
+        // which times are taken. That's how customers see availability without being able to
+        // read other people's bookings (T09).
+        allow read: if signedIn();
+
+        // A lock is created only together with its booking (getAfter = "as it will be after
+        // this write"), must lie inside that booking, and must pass the domino on to the next
+        // slot unless it is the last one.
+        allow create: if request.resource.data.keys().hasOnly(['bookingId', 'staffId', 'slot'])
+          && request.resource.data.slot is int
+          && lockId == request.resource.data.staffId + '_' + string(request.resource.data.slot)
+          && existsAfter(bookingPath(request.resource.data.bookingId))
+          && lockIsPartOfBooking(request.resource.data, getAfter(bookingPath(request.resource.data.bookingId)).data);
+
+        // No update rule: an existing lock can never be taken over by another booking.
+
+        // A lock is freed only when its booking becomes CANCELLED / MISSED in the same write,
+        // by someone allowed to make that change (the booking's customer or salon staff).
+        allow delete: if getAfter(bookingPath(resource.data.bookingId)).data.status in ['CANCELLED', 'MISSED']
+          && (isMemberOf(salonId)
+              || (signedIn() && getAfter(bookingPath(resource.data.bookingId)).data.customerId == request.auth.uid));
       }
     }
 
