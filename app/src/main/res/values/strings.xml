@@ -16,7 +16,6 @@
     <string name="welcome_body">Book your barber in three taps, see the live queue and keep your style notes in one place.</string>
     <string name="welcome_create_account">Create an account</string>
     <string name="welcome_sign_in">I already have an account</string>
-    <string name="welcome_footer">EC5208 · Group 12 · University of Ruhuna</string>
 
     <!-- Shared auth -->
     <string name="auth_email_label">Email</string>
