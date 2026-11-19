@@ -18,7 +18,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
+import com.group12.salonlink.data.firestore.awaitWrite
 
 /** [NotificationRepository] backed by `users/{uid}/notifications`. */
 @Singleton
@@ -37,7 +37,7 @@ class FirestoreNotificationRepository @Inject constructor(
 
     override suspend fun add(uid: String, notification: AppNotification) {
         try {
-            feed(uid).document(notification.id).set(notification.toFirestoreMap()).await()
+            feed(uid).document(notification.id).set(notification.toFirestoreMap()).awaitWrite()
         } catch (e: Exception) {
             throw e.toDataException()
         }
@@ -48,7 +48,7 @@ class FirestoreNotificationRepository @Inject constructor(
         try {
             val batch = db.batch()
             ids.forEach { batch.update(feed(uid).document(it), NotificationFields.READ, true) }
-            batch.commit().await()
+            batch.commit().awaitWrite()
         } catch (e: Exception) {
             throw e.toDataException()
         }

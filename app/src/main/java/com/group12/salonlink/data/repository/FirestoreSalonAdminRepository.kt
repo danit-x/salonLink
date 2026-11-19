@@ -14,7 +14,7 @@ import com.group12.salonlink.domain.repository.SalonAdminRepository
 import com.group12.salonlink.domain.validation.FormValidators
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.tasks.await
+import com.group12.salonlink.data.firestore.awaitWrite
 
 /** [SalonAdminRepository] on Firestore. Every write is checked again by the rules (owner only). */
 @Singleton
@@ -23,7 +23,7 @@ class FirestoreSalonAdminRepository @Inject constructor(
 ) : SalonAdminRepository {
 
     override suspend fun saveSalon(salon: Salon) = write {
-        salonDoc(salon.id).set(salon.toFirestoreMap()).await()
+        salonDoc(salon.id).set(salon.toFirestoreMap()).awaitWrite()
         Unit
     }
 
@@ -32,24 +32,24 @@ class FirestoreSalonAdminRepository @Inject constructor(
         // WHY let Firestore pick the id for new services: random ids never collide, even if
         // two owners add a service at the same moment.
         val ref = if (service.id.isBlank()) collection.document() else collection.document(service.id)
-        ref.set(service.toFirestoreMap()).await()
+        ref.set(service.toFirestoreMap()).awaitWrite()
         ref.id
     }
 
     override suspend fun saveStaff(salonId: String, staff: Staff): String = write {
         val collection = salonDoc(salonId).collection(FirestoreSchema.STAFF)
         val ref = if (staff.id.isBlank()) collection.document() else collection.document(staff.id)
-        ref.set(staff.toFirestoreMap()).await()
+        ref.set(staff.toFirestoreMap()).awaitWrite()
         ref.id
     }
 
     override suspend fun addBlock(salonId: String, staffId: String, block: StaffBlock) = write {
-        blocks(salonId, staffId).add(block.toFirestoreMap()).await()
+        blocks(salonId, staffId).add(block.toFirestoreMap()).awaitWrite()
         Unit
     }
 
     override suspend fun deleteBlock(salonId: String, staffId: String, blockId: String) = write {
-        blocks(salonId, staffId).document(blockId).delete().await()
+        blocks(salonId, staffId).document(blockId).delete().awaitWrite()
         Unit
     }
 
@@ -61,7 +61,7 @@ class FirestoreSalonAdminRepository @Inject constructor(
                     InviteFields.SALON_ID to salonId,
                     InviteFields.STAFF_ID to staffId,
                 ),
-            ).await()
+            ).awaitWrite()
         Unit
     }
 

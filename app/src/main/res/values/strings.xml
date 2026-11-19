@@ -286,6 +286,9 @@
     <!-- Schedule (staff Today + owner Dashboard) -->
     <string name="schedule_title_staff">Today\'s schedule</string>
     <string name="schedule_title_owner">Today at a glance</string>
+    <!-- Shown when another day than today is open. -->
+    <string name="schedule_title_staff_day">Schedule</string>
+    <string name="schedule_title_owner_day">Day at a glance</string>
     <string name="cd_previous_day">Previous day</string>
     <string name="cd_next_day">Next day</string>
     <string name="schedule_back_to_today">Back to today</string>

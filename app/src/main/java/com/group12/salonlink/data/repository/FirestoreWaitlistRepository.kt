@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import com.group12.salonlink.data.firestore.awaitWrite
 import kotlinx.coroutines.tasks.await
 
 /** [WaitlistRepository] on `salons/{id}/waitlist`. */
@@ -37,7 +38,7 @@ class FirestoreWaitlistRepository @Inject constructor(
 
     override suspend fun join(entry: WaitlistEntry): String = write {
         val ref = waitlist(entry.salonId).document()
-        ref.set(entry.copy(status = WaitlistStatus.WAITING, offer = null).toFirestoreMap()).await()
+        ref.set(entry.copy(status = WaitlistStatus.WAITING, offer = null).toFirestoreMap()).awaitWrite()
         ref.id
     }
 
@@ -65,7 +66,7 @@ class FirestoreWaitlistRepository @Inject constructor(
     override suspend fun offer(salonId: String, entryId: String, offer: WaitlistOffer) = write {
         waitlist(salonId).document(entryId).update(
             mapOf(WaitlistFields.STATUS to WaitlistStatus.OFFERED.name, WaitlistFields.OFFER to offer.toFirestoreMap()),
-        ).await()
+        ).awaitWrite()
         Unit
     }
 
@@ -74,7 +75,7 @@ class FirestoreWaitlistRepository @Inject constructor(
     override suspend fun leave(salonId: String, entryId: String) = setStatus(salonId, entryId, WaitlistStatus.LEFT)
 
     private suspend fun setStatus(salonId: String, entryId: String, status: WaitlistStatus) = write {
-        waitlist(salonId).document(entryId).update(WaitlistFields.STATUS, status.name).await()
+        waitlist(salonId).document(entryId).update(WaitlistFields.STATUS, status.name).awaitWrite()
         Unit
     }
 
@@ -104,7 +105,7 @@ class FirestoreQueueRepository @Inject constructor(
         try {
             board(salonId, staffId).set(
                 mapOf(QueueFields.ENTRIES to entries.map { it.toFirestoreMap() }, QueueFields.UPDATED_AT to FieldValue.serverTimestamp()),
-            ).await()
+            ).awaitWrite()
         } catch (e: Exception) {
             throw e.toDataException()
         }

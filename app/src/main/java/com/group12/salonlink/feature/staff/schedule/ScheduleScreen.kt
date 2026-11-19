@@ -87,7 +87,13 @@ fun ScheduleScreen(state: ScheduleUiState, onEvent: (ScheduleEvent) -> Unit) {
         ) {
             item {
                 SalonTopBar(
-                    title = stringResource(if (state.isOwner) R.string.schedule_title_owner else R.string.schedule_title_staff),
+                    title = stringResource(
+                        when {
+                            !state.isToday -> if (state.isOwner) R.string.schedule_title_owner_day else R.string.schedule_title_staff_day
+                            state.isOwner -> R.string.schedule_title_owner
+                            else -> R.string.schedule_title_staff
+                        },
+                    ),
                     subtitle = SalonTime.formatDayHeading(state.date),
                     actions = {
                         GlassIconButton(R.drawable.ic_chevron_left, stringResource(R.string.cd_previous_day), { onEvent(ScheduleEvent.PreviousDay) })

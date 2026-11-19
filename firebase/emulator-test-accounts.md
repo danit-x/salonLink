@@ -38,5 +38,6 @@ Use the local emulators to create and delete throwaway accounts without touching
 | Role     | Email                        | Password         | How it gets its role |
 |----------|------------------------------|------------------|----------------------|
 | Customer | customer.test@salonlink.test | Customer!Test123 | Self-registered (default role) |
+| Customer 2 | customer2.test@salonlink.test | Customer!Test123 | Self-registered; used to test the waitlist (one customer books, the other waits) |
 | Staff    | staff.test@salonlink.test    | Staff!Test123    | Invite `{role: STAFF, salonId: aura, staffId: kasun}` created by the seed script; register after seeding |
 | Owner    | owner.test@salonlink.test    | Owner!Test123    | Invite `{role: OWNER, salonId: aura}` created by the seed script; register after seeding |
