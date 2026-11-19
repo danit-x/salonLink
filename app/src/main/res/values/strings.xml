@@ -275,23 +275,109 @@
     <string name="tab_today">Today</string>
     <string name="tab_walk_ins">Walk-ins</string>
     <string name="tab_salon">Salon</string>
-    <string name="staff_today_placeholder_title">Today\'s schedule</string>
-    <string name="staff_today_placeholder_message">Your appointments in time order, with one-tap status updates: checked in, in service, completed.</string>
-    <string name="staff_walkin_placeholder_title">Walk-in customers</string>
-    <string name="staff_walkin_placeholder_message">Add a walk-in guest and slot them into the live queue next to booked customers.</string>
-    <string name="staff_salon_placeholder_title">Salon info</string>
-    <string name="staff_salon_placeholder_message">Your working hours and salon details.</string>
+    <string name="staff_salon_note">Your working hours and time off are managed by the salon owner.</string>
 
     <!-- Owner tabs -->
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_services">Services</string>
     <string name="tab_staff">Staff</string>
-    <string name="owner_dashboard_placeholder_title">Today at a glance</string>
-    <string name="owner_dashboard_placeholder_message">Bookings, completed services, walk-ins and revenue for the day.</string>
-    <string name="owner_services_placeholder_title">Services &amp; prices</string>
-    <string name="owner_services_placeholder_message">Add, edit and retire services with their duration, price and staff.</string>
-    <string name="owner_staff_placeholder_title">Your team</string>
-    <string name="owner_staff_placeholder_message">Invite staff, set working hours and block time off.</string>
-    <string name="owner_salon_placeholder_title">Salon details</string>
-    <string name="owner_salon_placeholder_message">Name, address, phone and opening hours.</string>
+
+    <!-- ===================== Phase 6: staff and owner ===================== -->
+    <!-- Schedule (staff Today + owner Dashboard) -->
+    <string name="schedule_title_staff">Today\'s schedule</string>
+    <string name="schedule_title_owner">Today at a glance</string>
+    <string name="cd_previous_day">Previous day</string>
+    <string name="cd_next_day">Next day</string>
+    <string name="schedule_back_to_today">Back to today</string>
+    <string name="schedule_empty">No bookings on this day yet.</string>
+    <string name="schedule_all_staff">Everyone</string>
+    <string name="stat_bookings">Bookings</string>
+    <string name="stat_completed">Completed</string>
+    <string name="stat_walk_ins">Walk-ins</string>
+    <string name="stat_revenue">Revenue</string>
+    <string name="stat_revenue_expected">%1$s expected</string>
+    <string name="schedule_walk_in_label">Walk-in</string>
+    <string name="schedule_note">Note: %1$s</string>
+    <string name="action_check_in">Check in</string>
+    <string name="action_start">Start</string>
+    <string name="action_complete">Complete</string>
+    <string name="action_no_show">No-show</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="confirm_status_title_missed">Mark as no-show?</string>
+    <string name="confirm_status_title_cancelled">Cancel this booking?</string>
+    <string name="confirm_status_text">%1$s, %2$s. The time becomes free for walk-ins and the waitlist.</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_back">Back</string>
+    <string name="status_updated">%1$s: %2$s</string>
+
+    <!-- Walk-ins -->
+    <string name="walkin_title">Add a walk-in</string>
+    <string name="walkin_body">For guests at the counter. They join today\'s schedule and the live queue.</string>
+    <string name="walkin_name_label">Guest name</string>
+    <string name="walkin_name_placeholder">e.g. Nimal</string>
+    <string name="walkin_barber_label">Barber</string>
+    <string name="walkin_services_label">Services</string>
+    <string name="walkin_time_label">Start time today</string>
+    <string name="walkin_no_times">No free time left today for these services.</string>
+    <string name="walkin_pick_services">Pick at least one service to see free times.</string>
+    <string name="walkin_submit">Add walk-in</string>
+    <string name="walkin_added">%1$s added at %2$s.</string>
+
+    <!-- Services (owner) -->
+    <string name="services_admin_title">Services &amp; prices</string>
+    <string name="services_admin_add">Add service</string>
+    <string name="services_admin_inactive">Hidden from customers</string>
+    <string name="service_editor_new">New service</string>
+    <string name="service_editor_edit">Edit service</string>
+    <string name="service_name_label">Name</string>
+    <string name="service_description_label">Description</string>
+    <string name="service_category_label">Category</string>
+    <string name="service_duration_label">Duration (minutes, steps of 10)</string>
+    <string name="service_price_label">Price (Rs.)</string>
+    <string name="service_staff_label">Who can do it</string>
+    <string name="service_active_label">Visible to customers</string>
+    <string name="service_error_duration">Use 10 to 160 minutes, in steps of 10.</string>
+    <string name="service_error_price">Enter a price in whole rupees.</string>
+    <string name="category_haircut">Haircut</string>
+    <string name="category_treatment">Treatment</string>
+    <string name="category_other">Other</string>
+    <string name="action_save">Save</string>
+    <string name="saved">Saved.</string>
+
+    <!-- Team (owner) -->
+    <string name="team_title">Your team</string>
+    <string name="team_add">Add staff member</string>
+    <string name="team_inactive">Not taking bookings</string>
+    <string name="staff_editor_new">New staff member</string>
+    <string name="staff_editor_edit">Edit %1$s</string>
+    <string name="staff_name_label">Full name</string>
+    <string name="staff_bio_label">Short bio</string>
+    <string name="staff_specialties_label">Specialties (comma separated)</string>
+    <string name="staff_years_label">Years of experience</string>
+    <string name="staff_active_label">Taking bookings</string>
+    <string name="hours_title">Working hours</string>
+    <string name="hours_closed">Closed</string>
+    <string name="hours_error">Each open day needs a start before its end.</string>
+    <string name="blocks_title">Time off &amp; breaks</string>
+    <string name="blocks_empty">No upcoming time off.</string>
+    <string name="blocks_add">Block time</string>
+    <string name="block_reason_label">Reason (e.g. Lunch, Leave)</string>
+    <string name="block_date">Date</string>
+    <string name="block_from">From</string>
+    <string name="block_to">To</string>
+    <string name="cd_delete_block">Remove this time off</string>
+    <string name="invite_title">App access</string>
+    <string name="invite_body">Invite this person\'s email. When they register with it, they get the staff app for this salon.</string>
+    <string name="invite_email_label">Staff email</string>
+    <string name="invite_send">Send invite</string>
+    <string name="invite_sent">Invite saved for %1$s. Ask them to register with this email.</string>
+    <string name="save_staff_first">Save the staff member first, then you can add time off and invite them.</string>
+
+    <!-- Salon settings (owner) -->
+    <string name="salon_settings_title">Salon details</string>
+    <string name="salon_name_label">Salon name</string>
+    <string name="salon_address_label">Address</string>
+    <string name="salon_area_label">Area (e.g. Colombo 05)</string>
+    <string name="salon_phone_label">Phone</string>
+    <string name="opening_hours_title">Opening hours</string>
 </resources>

@@ -1,18 +1,24 @@
-// Covers: staff navigation (US-07, US-08) · Design: new, in the Figma visual language
+// Covers: staff navigation (US-07, US-08) · Design: new, in the app's visual language
 package com.group12.salonlink.feature.staff
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.composable
 import com.group12.salonlink.R
 import com.group12.salonlink.core.designsystem.component.BottomBarItem
-import com.group12.salonlink.core.designsystem.component.PlaceholderScreen
 import com.group12.salonlink.core.navigation.RoleShell
 import com.group12.salonlink.core.navigation.StaffSalonRoute
 import com.group12.salonlink.core.navigation.StaffTodayRoute
 import com.group12.salonlink.core.navigation.StaffWalkInsRoute
 import com.group12.salonlink.domain.model.UserProfile
 import com.group12.salonlink.feature.account.AccountSummary
+import com.group12.salonlink.feature.staff.schedule.ScheduleScreen
+import com.group12.salonlink.feature.staff.schedule.ScheduleViewModel
+import com.group12.salonlink.feature.staff.walkin.WalkInScreen
+import com.group12.salonlink.feature.staff.walkin.WalkInViewModel
 
 private val staffTabs = listOf(
     BottomBarItem(StaffTodayRoute, R.string.tab_today, R.drawable.ic_calendar_days),
@@ -20,32 +26,22 @@ private val staffTabs = listOf(
     BottomBarItem(StaffSalonRoute, R.string.tab_salon, R.drawable.ic_map_pin),
 )
 
-/** Staff (barber / stylist) home: today's schedule, walk-ins and salon info. */
+/** Staff (barber / stylist) home: their own day with status buttons, walk-ins, and account. */
 @Composable
 fun StaffShell(user: UserProfile, onSignOut: () -> Unit) {
     RoleShell(tabs = staffTabs) {
         composable<StaffTodayRoute> {
-            PlaceholderScreen(
-                title = stringResource(R.string.staff_today_placeholder_title),
-                message = stringResource(R.string.staff_today_placeholder_message),
-                badge = stringResource(R.string.badge_phase, 6),
-                icon = R.drawable.ic_calendar_days,
-            )
+            val viewModel: ScheduleViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            ScheduleScreen(state, viewModel::onEvent)
         }
         composable<StaffWalkInsRoute> {
-            PlaceholderScreen(
-                title = stringResource(R.string.staff_walkin_placeholder_title),
-                message = stringResource(R.string.staff_walkin_placeholder_message),
-                badge = stringResource(R.string.badge_phase, 6),
-                icon = R.drawable.ic_user_round,
-            )
+            val viewModel: WalkInViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            WalkInScreen(state, viewModel::onEvent)
         }
         composable<StaffSalonRoute> {
-            AccountSummary(
-                user = user,
-                nextUpNote = stringResource(R.string.staff_salon_placeholder_message),
-                onSignOut = onSignOut,
-            )
+            AccountSummary(user = user, nextUpNote = stringResource(R.string.staff_salon_note), onSignOut = onSignOut)
         }
     }
 }

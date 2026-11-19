@@ -64,11 +64,11 @@ class FirestoreSalonRepository @Inject constructor(
             }
             .flowOn(dispatcher)
 
-    override fun observeStaff(salonId: String): Flow<List<Staff>> =
+    override fun observeStaff(salonId: String, includeInactive: Boolean): Flow<List<Staff>> =
         salonDoc(salonId).collection(FirestoreSchema.STAFF)
             .orderBy(StaffFields.NAME)
             .observe()
-            .map { snapshot -> snapshot.documents.map { staffFromMap(it.id, it.data.orEmpty()) }.filter { it.active } }
+            .map { snapshot -> snapshot.documents.map { staffFromMap(it.id, it.data.orEmpty()) }.filter { includeInactive || it.active } }
             .flowOn(dispatcher)
 
     override fun observeStaffMember(salonId: String, staffId: String): Flow<Staff?> =

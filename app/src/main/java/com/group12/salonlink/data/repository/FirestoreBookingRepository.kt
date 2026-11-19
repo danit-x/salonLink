@@ -145,6 +145,32 @@ class FirestoreBookingRepository @Inject constructor(
         Unit
     }
 
+    override suspend fun updateStatus(salonId: String, bookingId: String, status: BookingStatus) = runEngine {
+        require(status != BookingStatus.CANCELLED) { "Use cancelBooking() to cancel" }
+        val bookingRef = bookings(salonId).document(bookingId)
+        db.runTransaction { tx ->
+            val booking = tx.get(bookingRef).toBooking() ?: throw DataException(DataError.NOT_FOUND)
+            if (booking.status == status) return@runTransaction // already done: retry-safe
+            if (!booking.status.canTransitionTo(status)) throw DataException(DataError.NOT_ALLOWED)
+
+            // A no-show frees the rest of its time (e.g. for a walk-in), like a cancellation.
+            val freedLocks = if (status == BookingStatus.MISSED) {
+                booking.slots.map { lockRef(salonId, booking.staffId, it) }
+                    .filter { ref -> tx.get(ref).getString(SlotLockFields.BOOKING_ID) == bookingId }
+            } else {
+                emptyList()
+            }
+            val changes = buildMap<String, Any> {
+                put(BookingFields.STATUS, status.name)
+                if (status == BookingStatus.CHECKED_IN) put(BookingFields.CHECKED_IN_AT, FieldValue.serverTimestamp())
+                putAll(serverTimes(created = false))
+            }
+            tx.update(bookingRef, changes)
+            freedLocks.forEach(tx::delete)
+        }.await()
+        Unit
+    }
+
     // ---------------------------------------------------------------------------------
 
     /**

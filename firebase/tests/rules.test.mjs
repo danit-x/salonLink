@@ -577,3 +577,68 @@ describe("Everything else", () => {
     await assertFails(getDoc(doc(db, "secrets/x")));
   });
 });
+
+// ---------- Owner management of the catalogue (v5, Phase 6) ----------
+
+describe("Owner manages the salon", () => {
+  const owner = () => as("owner-uid", "owner@aura.lk");
+  const staffUser = () => as("kasun-uid", "kasun@aura.lk");
+  const service = (extra = {}) => ({
+    name: "Haircut", description: "Cut & finish", category: "HAIRCUT",
+    durationMin: 30, price: 1500, staffIds: ["kasun"], active: true, ...extra,
+  });
+  const staffDoc = (extra = {}) => ({
+    name: "Amali Silva", bio: "", specialties: ["Fade"], rating: 0, reviewCount: 0, yearsExperience: 2,
+    photoUrl: null, portfolioUrls: [], workingHours: { MON: ["09:00", "17:00"] }, active: true, ...extra,
+  });
+
+  beforeEach(async () => {
+    await seed("salons/aura", { name: "Aura Salon", address: "24 Havelock Road", area: "Colombo 05", phone: null, openingHours: {} });
+    await seed("salons/other", { name: "Other Salon", address: "", area: "", phone: null, openingHours: {} });
+    await seed("users/owner-uid", { ...customerProfile("owner@aura.lk", { role: "OWNER", salonId: "aura" }), createdAt: new Date() });
+    await seed("users/kasun-uid", { ...customerProfile("kasun@aura.lk", { role: "STAFF", salonId: "aura", staffId: "kasun" }), createdAt: new Date() });
+    await seed("salons/aura/staff/kasun", { ...staffDoc({ name: "Kasun Perera" }), rating: 4.9, reviewCount: 128 });
+  });
+
+  test("the owner adds and edits a service", async () => {
+    await assertSucceeds(setDoc(doc(owner(), "salons/aura/services/s1"), service()));
+    await assertSucceeds(setDoc(doc(owner(), "salons/aura/services/s1"), service({ price: 1800, active: false })));
+  });
+
+  test("a service must be whole 10-minute slots and at most 160 minutes", async () => {
+    await assertFails(setDoc(doc(owner(), "salons/aura/services/s1"), service({ durationMin: 25 })));
+    await assertFails(setDoc(doc(owner(), "salons/aura/services/s1"), service({ durationMin: 170 })));
+  });
+
+  test("staff and customers cannot change services; owners cannot touch another salon", async () => {
+    await assertFails(setDoc(doc(staffUser(), "salons/aura/services/s1"), service()));
+    await assertFails(setDoc(doc(as("kavindu", "kavindu@example.com"), "salons/aura/services/s1"), service()));
+    await assertFails(setDoc(doc(owner(), "salons/other/services/s1"), service()));
+  });
+
+  test("services are retired, never deleted", async () => {
+    await seed("salons/aura/services/s1", service());
+    await assertFails(deleteDoc(doc(owner(), "salons/aura/services/s1")));
+  });
+
+  test("the owner adds staff starting at a zero rating, and cannot fake ratings", async () => {
+    await assertSucceeds(setDoc(doc(owner(), "salons/aura/staff/amali"), staffDoc()));
+    await assertFails(setDoc(doc(owner(), "salons/aura/staff/fake"), staffDoc({ rating: 5, reviewCount: 999 })));
+    await assertSucceeds(setDoc(doc(owner(), "salons/aura/staff/kasun"), { ...staffDoc({ name: "Kasun Perera", bio: "New bio" }), rating: 4.9, reviewCount: 128 }));
+    await assertFails(setDoc(doc(owner(), "salons/aura/staff/kasun"), { ...staffDoc({ name: "Kasun Perera" }), rating: 5, reviewCount: 128 }));
+  });
+
+  test("the owner blocks time and removes it again; staff cannot", async () => {
+    const block = { start: new Date("2027-01-05T07:30:00Z"), end: new Date("2027-01-05T08:00:00Z"), reason: "Lunch" };
+    await assertSucceeds(setDoc(doc(owner(), "salons/aura/staff/kasun/blocks/b1"), block));
+    await assertFails(setDoc(doc(owner(), "salons/aura/staff/kasun/blocks/b2"), { ...block, end: block.start }));
+    await assertFails(setDoc(doc(staffUser(), "salons/aura/staff/kasun/blocks/b3"), block));
+    await assertSucceeds(deleteDoc(doc(owner(), "salons/aura/staff/kasun/blocks/b1")));
+  });
+
+  test("the owner edits the salon details, staff cannot", async () => {
+    const details = { name: "Aura Salon & Spa", address: "24 Havelock Road", area: "Colombo 05", phone: "0112345678", openingHours: { MON: ["09:00", "19:00"] } };
+    await assertSucceeds(setDoc(doc(owner(), "salons/aura"), details));
+    await assertFails(setDoc(doc(staffUser(), "salons/aura"), details));
+  });
+});

@@ -52,4 +52,11 @@ interface BookingRepository {
      * Cancelling an already-cancelled booking is a no-op (safe to retry).
      */
     suspend fun cancelBooking(salonId: String, bookingId: String)
+
+    /**
+     * Moves a booking along the status table (check in, start, complete, no-show), staff only.
+     * Throws NOT_ALLOWED if [BookingStatus.canTransitionTo] says no. MISSED also frees the slots.
+     * For cancelling use [cancelBooking].
+     */
+    suspend fun updateStatus(salonId: String, bookingId: String, status: com.group12.salonlink.domain.model.BookingStatus)
 }

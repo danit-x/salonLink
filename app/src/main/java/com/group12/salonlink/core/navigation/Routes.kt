@@ -76,3 +76,9 @@ import kotlinx.serialization.Serializable
 @Serializable data object OwnerServicesRoute
 @Serializable data object OwnerStaffRoute
 @Serializable data object OwnerSalonRoute
+
+/** Add (blank id) or edit a staff member: profile, working hours, time off, app invite. */
+@Serializable data class OwnerStaffEditorRoute(val staffId: String = "")
+
+/** Walk-in form opened from the owner dashboard (staff have it as a tab). */
+@Serializable data object OwnerWalkInRoute

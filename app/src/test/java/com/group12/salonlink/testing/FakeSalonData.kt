@@ -34,7 +34,8 @@ class FakeSalonRepository : SalonRepository {
     override fun observeSalon(salonId: String): Flow<Salon?> = salons.map { it[salonId] }
     override fun observeServices(salonId: String, includeInactive: Boolean): Flow<List<SalonService>> =
         services.map { list -> list.filter { includeInactive || it.active } }
-    override fun observeStaff(salonId: String): Flow<List<Staff>> = staff.map { list -> list.filter { it.active } }
+    override fun observeStaff(salonId: String, includeInactive: Boolean): Flow<List<Staff>> =
+        staff.map { list -> list.filter { includeInactive || it.active } }
     override fun observeStaffMember(salonId: String, staffId: String): Flow<Staff?> =
         staff.map { list -> list.firstOrNull { it.id == staffId } }
     override fun observeBlocks(salonId: String, staffId: String, from: Instant, to: Instant): Flow<List<StaffBlock>> =
@@ -81,6 +82,14 @@ class FakeBookingRepository : BookingRepository {
         if (!booking.status.canTransitionTo(BookingStatus.CANCELLED)) throw DataException(DataError.NOT_ALLOWED)
         locks.value = locks.value.filterValues { it != bookingId }
         bookings.value = bookings.value + (bookingId to booking.copy(status = BookingStatus.CANCELLED))
+    }
+
+    override suspend fun updateStatus(salonId: String, bookingId: String, status: BookingStatus) {
+        val booking = bookings.value[bookingId] ?: throw DataException(DataError.NOT_FOUND)
+        if (booking.status == status) return
+        if (!booking.status.canTransitionTo(status)) throw DataException(DataError.NOT_ALLOWED)
+        if (status == BookingStatus.MISSED) locks.value = locks.value.filterValues { it != bookingId }
+        bookings.value = bookings.value + (bookingId to booking.copy(status = status))
     }
 
     /** Test helper: pretend another phone grabbed these slots a moment ago. */

@@ -121,6 +121,41 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Catalogue shapes (v5, Phase 6) ----------
+    function shortText(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+
+    function validSalon(s) {
+      return s.keys().hasOnly(['name', 'address', 'area', 'phone', 'openingHours'])
+        && shortText(s.name, 1, 80) && shortText(s.address, 0, 160) && shortText(s.area, 0, 60)
+        && (s.phone == null || shortText(s.phone, 0, 20))
+        && s.openingHours is map;
+    }
+
+    function validService(v) {
+      return v.keys().hasOnly(['name', 'description', 'category', 'durationMin', 'price', 'staffIds', 'active'])
+        && shortText(v.name, 1, 60) && shortText(v.description, 0, 200)
+        && v.category in ['HAIRCUT', 'BEARD', 'COLOUR', 'TREATMENT', 'OTHER']
+        // Whole 10-minute slots, at most 16 of them (the booking engine's limit).
+        && v.durationMin is int && v.durationMin >= 10 && v.durationMin <= 160 && v.durationMin % 10 == 0
+        && v.price is int && v.price >= 0 && v.price <= 1000000
+        && v.staffIds is list && v.staffIds.size() <= 50
+        && v.active is bool;
+    }
+
+    function validStaff(v) {
+      return v.keys().hasOnly(['name', 'bio', 'specialties', 'rating', 'reviewCount', 'yearsExperience',
+                               'photoUrl', 'portfolioUrls', 'workingHours', 'active'])
+        && shortText(v.name, 1, 60) && shortText(v.bio, 0, 300)
+        && v.specialties is list && v.specialties.size() <= 10
+        && v.yearsExperience is int && v.yearsExperience >= 0 && v.yearsExperience <= 80
+        && (v.photoUrl == null || shortText(v.photoUrl, 0, 500))
+        && v.portfolioUrls is list && v.portfolioUrls.size() <= 10
+        && v.workingHours is map
+        && v.active is bool;
+    }
+
     function validNotification(n) {
       return n.keys().hasOnly(['type', 'salonId', 'bookingId', 'title', 'staffName', 'start', 'status', 'read', 'createdAt'])
         && n.type in ['BOOKING_CONFIRMED', 'BOOKING_CANCELLED', 'STATUS_CHANGED', 'WAITLIST_OFFER']
@@ -153,20 +188,37 @@ service cloud.firestore {
 
     // ---------- salons/{salonId} and its catalogue (v2, Phase 2) ----------
     // Any signed-in user may browse salons, services, staff and staff blocks: customers need
-    // them to choose and book (availability needs the staff blocks too). Writes stay closed until the owner screens (Phase 6) add rules for them;
-    // until then the seed script writes with admin access.
+    // them to choose and book (availability needs the staff blocks too).
+    // Writes (v5, Phase 6): only the salon's OWNER, with every field checked. New salons are
+    // created with admin access (seed script / console), never from the app.
     match /salons/{salonId} {
       allow read: if signedIn();
+      allow update: if isOwnerOf(salonId) && validSalon(request.resource.data);
 
       match /services/{serviceId} {
         allow read: if signedIn();
+        // No delete: an old booking may point at it. Retire it with active = false instead.
+        allow create, update: if isOwnerOf(salonId) && validService(request.resource.data);
       }
 
       match /staff/{staffId} {
         allow read: if signedIn();
+        // Ratings can't be typed in by the owner: new staff start at 0, existing ones keep theirs.
+        allow create: if isOwnerOf(salonId) && validStaff(request.resource.data)
+          && request.resource.data.rating == 0 && request.resource.data.reviewCount == 0;
+        allow update: if isOwnerOf(salonId) && validStaff(request.resource.data)
+          && request.resource.data.rating == resource.data.rating
+          && request.resource.data.reviewCount == resource.data.reviewCount;
 
         match /blocks/{blockId} {
           allow read: if signedIn();
+          allow create: if isOwnerOf(salonId)
+            && request.resource.data.keys().hasOnly(['start', 'end', 'reason'])
+            && request.resource.data.start is timestamp
+            && request.resource.data.end is timestamp
+            && request.resource.data.start < request.resource.data.end
+            && request.resource.data.reason is string && request.resource.data.reason.size() <= 60;
+          allow delete: if isOwnerOf(salonId);
         }
       }
 

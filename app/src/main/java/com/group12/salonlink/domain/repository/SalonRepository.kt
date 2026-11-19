@@ -30,8 +30,11 @@ interface SalonRepository {
      */
     fun observeServices(salonId: String, includeInactive: Boolean = false): Flow<List<SalonService>>
 
-    /** Active staff members, by name. */
-    fun observeStaff(salonId: String): Flow<List<Staff>>
+    /**
+     * Staff members, by name.
+     * @param includeInactive true only for the owner's team screen (to re-activate someone).
+     */
+    fun observeStaff(salonId: String, includeInactive: Boolean = false): Flow<List<Staff>>
 
     /** One staff member (Barber profile), or null if missing. */
     fun observeStaffMember(salonId: String, staffId: String): Flow<Staff?>
