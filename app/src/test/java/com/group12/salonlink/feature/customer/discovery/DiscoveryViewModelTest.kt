@@ -27,6 +27,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import com.group12.salonlink.domain.model.StyleProfile
+import com.group12.salonlink.domain.model.StyleTag
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -61,7 +63,9 @@ class DiscoveryViewModelTest {
         signInAs(UserProfile("kavindu", "Kavindu Perera", "kavindu@example.com", null, Role.CUSTOMER))
     }
 
-    private fun TestScope.viewModel() = DiscoveryViewModel(salons, bookings, auth, clock).also { vm ->
+    private val style = com.group12.salonlink.testing.FakeStyleRepository()
+
+    private fun TestScope.viewModel() = DiscoveryViewModel(salons, bookings, auth, style, clock).also { vm ->
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
     }
 
@@ -82,6 +86,18 @@ class DiscoveryViewModelTest {
         assertEquals(listOf("kasun", "nadeesha"), state.barbers.map { it.staff.id })
         assertEquals("kasun", state.featured?.staff?.id)
         assertEquals(800L, state.barbers.first().fromPrice) // cheapest of Kasun's services: Beard Trim
+    }
+
+    @Test
+    fun `with style tags the best match is featured, with a favourite that one comes first`() = runTest {
+        style.profiles.value = mapOf("kavindu" to StyleProfile(tags = setOf(StyleTag.LONG_HAIR)))
+        val vm = viewModel()
+        // Nadeesha does long hair: 80 + 19 = 99; Kasun (4.9, fade only): 0 + 20 = 20.
+        assertEquals(listOf("nadeesha", "kasun"), vm.uiState.value.barbers.map { it.staff.id })
+        assertEquals(99, vm.uiState.value.featured?.match)
+
+        style.profiles.value = mapOf("kavindu" to StyleProfile(tags = setOf(StyleTag.LONG_HAIR), preferredStaffId = "kasun"))
+        assertEquals("kasun", vm.uiState.value.featured?.staff?.id)
     }
 
     @Test

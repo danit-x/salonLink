@@ -413,4 +413,47 @@
     <string name="salon_area_label">Area (e.g. Colombo 05)</string>
     <string name="salon_phone_label">Phone</string>
     <string name="opening_hours_title">Opening hours</string>
+
+    <!-- ===================== Phase 9: style profile, matching, languages ===================== -->
+    <string name="style_title">My style</string>
+    <string name="style_headline">Your look, your words.</string>
+    <string name="style_tags_title">Styles you like</string>
+    <string name="style_tag_fade">Fade</string>
+    <string name="style_tag_curly">Curly / textured</string>
+    <string name="style_tag_colour">Colour</string>
+    <string name="style_tag_beard">Beard</string>
+    <string name="style_tag_long">Long hair</string>
+    <string name="style_tag_treatment">Hair treatment</string>
+    <string name="style_tag_classic">Classic cut</string>
+    <string name="style_note_label">Note for your barber</string>
+    <string name="style_note_placeholder">e.g. Low fade, keep the length on top</string>
+    <string name="style_note_counter">%1$d / %2$d</string>
+    <string name="style_share_label">Share my style with my barber</string>
+    <string name="style_share_on">Your styles and note are added to each new booking, so your barber sees them on the day. Photos are never shared.</string>
+    <string name="style_share_off">Your profile stays private. Turn this on to send your styles and note with new bookings.</string>
+    <string name="style_barber_title">Favourite barber</string>
+    <string name="style_barber_hint">Best match for your styles first. Tap to choose; tap again to clear.</string>
+    <string name="style_barber_hint_no_tags">Pick a few styles above to see who matches you best.</string>
+    <string name="match_percent">%1$d%% match</string>
+    <string name="style_save">Save my style</string>
+    <string name="style_saved">Saved. Your style is up to date.</string>
+    <string name="style_moodboard_title">Moodboard</string>
+    <string name="style_moodboard_body">Inspiration and your past cuts, up to %1$d photos. Only you can see them; show them at the salon from your phone.</string>
+    <string name="style_moodboard_empty">No photos yet. Add a look you love or a cut you want again.</string>
+    <string name="style_add_inspiration">Inspiration</string>
+    <string name="style_add_result">My past cut</string>
+    <string name="style_label_inspiration">Inspiration</string>
+    <string name="style_label_result">Past cut</string>
+    <string name="style_photo_adding">Adding your photo…</string>
+    <string name="style_photo_added">Photo added to your moodboard.</string>
+    <string name="cd_delete_photo">Delete this photo</string>
+    <string name="style_consent_title">Keep photos in your account?</string>
+    <string name="style_consent_text">Your photos are made smaller and stored in your SalonLink account. Only you can see them, and you can delete any photo at any time.</string>
+    <string name="style_consent_agree">I agree</string>
+    <string name="language_title">Language</string>
+    <string name="language_system">Phone default</string>
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_sinhala" translatable="false">සිංහල</string>
+    <string name="language_tamil" translatable="false">தமிழ்</string>
+    <string name="discovery_tag_best_match">%1$d%% match for you</string>
 </resources>

@@ -6,8 +6,8 @@ EC5208 · Group 12 · Results recorded 19 Nov 2026 on the API 37 emulator (`Salo
 
 | Suite | Where | Count | Result | Command |
 |---|---|---|---|---|
-| Unit tests (JVM) | `app/src/test` | 131 | all pass | `./gradlew :app:testDebugUnitTest` |
-| Security-rules tests (Firestore emulator) | `firebase/tests/rules.test.mjs` | 75 | all pass | `firebase emulators:exec --only firestore --project demo-salonlink "npm --prefix firebase/tests test"` |
+| Unit tests (JVM) | `app/src/test` | 138 | all pass | `./gradlew :app:testDebugUnitTest` |
+| Security-rules tests (Firestore emulator) | `firebase/tests/rules.test.mjs` | 78 | all pass | `firebase emulators:exec --only firestore --project demo-salonlink "npm --prefix firebase/tests test"` |
 | Compose UI tests (emulator) | `app/src/androidTest` | 5 | all pass | `./gradlew :app:connectedDebugAndroidTest` |
 | Manual end-to-end runs | emulator + local Firebase emulators | see below | as described | `firebase/emulator-test-accounts.md` |
 
@@ -24,6 +24,7 @@ EC5208 · Group 12 · Results recorded 19 Nov 2026 on the API 37 emulator (`Salo
 | **T09** Permission isolation | Customer A can't read customer B's booking, profile or feed. | Rules: *Reading bookings (T09)* incl. "a customer cannot read another customer's booking"; *Profile privacy (T09)*; "a customer cannot write into another customer's feed". |
 | **T10** | *Not listed in the plan's test mapping; check against the proposal before submission.* | — |
 | **T11** Network failure | A retry after a dropped connection never books twice; offline states are visible. | Unit: "T11 – confirming twice with the same id makes only one booking", "T11 – after a network error, retrying makes exactly one booking". Rules: "T11: checking whether a booking id exists is allowed before it's written", "no duplicates on retry" for the feed. Code: transactions fail fast offline with a clear message; plain writes stop waiting after 8 s (`awaitWrite`). |
+| **Phase 9** Style profile, matching, languages | Match score, consent-gated sharing and photos, private profile, language switch. | Unit: `BarberMatcherTest` (5), Discovery "best match is featured, favourite first", BookingFlow "style note only when shared". Rules: *Style profile and photos (v7)* (private, shape, consent + 300 KB limit). Manual: 100 % / 19 % match, photo added (35 KB), booking note "Style: Fade, Beard · Low fade, keep the top", Sinhala/Tamil screenshots `docs/screenshots/p9-*.png`. |
 | **T12** Compatibility | Works on a normal and a small phone. | Screenshots in `docs/screenshots/`: `t12-phone-explore.png` (1080×2400, 420 dpi) and `t12-small-*.png` (720×1280, 320 dpi): Explore, upcoming appointment, barber profile, services step. Content scrolls and the main button stays pinned and visible. minSdk 26 (Android 8.0). |
 
 ## Code review (Phase 10)

@@ -30,6 +30,11 @@ class SalonLinkApp : Application(), Configuration.Provider {
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
+    /** Same language for text made outside screens (phone notifications, reminders). */
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(com.group12.salonlink.core.locale.LanguageStore.wrap(base))
+    }
+
     override fun onCreate() {
         super.onCreate()
         notifier.createChannels()

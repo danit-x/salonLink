@@ -29,6 +29,11 @@ class MainActivity : ComponentActivity() {
 
     private val rootViewModel: RootViewModel by viewModels()
 
+    /** Applies the language picked on "My style" (see [LanguageStore]). */
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(com.group12.salonlink.core.locale.LanguageStore.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Must run before super.onCreate(): shows the branded splash screen.
         val splash = installSplashScreen()

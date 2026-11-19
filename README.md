@@ -5,7 +5,7 @@ An Android app for salons, built for **EC5208 Mobile Application Development (Gr
 
 | Customer | Staff | Owner |
 |---|---|---|
-| Explore barbers and services, book in 3 steps, Bookings tab (upcoming / history / cancel ≥ 24 h), waitlist with freed-slot offers, live queue + ETA, notification feed, reminders 24 h and 2 h before | Live day schedule, check in → start → complete, no-show, cancel, add walk-ins | Day at a glance (bookings, walk-ins, revenue), services, team (hours, time off, invites), salon details |
+| Explore barbers and services (ranked by style match), book in 3 steps, Bookings tab (upcoming / history / cancel ≥ 24 h), waitlist with freed-slot offers, live queue + ETA, notification feed, reminders 24 h and 2 h before, **My style** (style tags, note for the barber with consent, favourite barber, private moodboard), **English / සිංහල / தமிழ்** | Live day schedule, check in → start → complete, no-show, cancel, add walk-ins | Day at a glance (bookings, walk-ins, revenue), services, team (hours, time off, invites), salon details |
 
 Screenshots: [`docs/screenshots/`](docs/screenshots/).
 
@@ -43,9 +43,9 @@ More detail: [Architecture & diagrams](docs/ARCHITECTURE.md) · [Test evidence T
 ## Tests
 
 ```
-./gradlew :app:testDebugUnitTest            # 131 unit tests (JVM)
+./gradlew :app:testDebugUnitTest            # 138 unit tests (JVM)
 ./gradlew :app:connectedDebugAndroidTest    # 5 Compose UI tests (emulator/device)
-firebase emulators:exec --only firestore --project demo-salonlink "npm --prefix firebase/tests test"   # 75 rules tests
+firebase emulators:exec --only firestore --project demo-salonlink "npm --prefix firebase/tests test"   # 78 rules tests
 ```
 
 ## Release APK
@@ -81,6 +81,6 @@ docs/        architecture, test evidence, demo script, screenshots
 
 ## Status
 
-Phases 0–7 and 10–11 are done. **Phase 8 (AI concierge) is on hold**, and the Concierge tab shows
-"coming soon". **Phase 9** (style profile, barber matching, Sinhala/Tamil) is not done yet.
+Phases 0–7 and 9–11 are done. **Phase 8 (AI concierge) is on hold**, and the Concierge tab shows
+"coming soon". Sinhala and Tamil cover the customer app; staff and owner screens are English.
 See [PLAN.md](PLAN.md) for each phase's status and the honest limitations of the free Firebase plan.

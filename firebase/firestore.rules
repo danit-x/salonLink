@@ -1,7 +1,7 @@
 rules_version = '2';
 
 // =====================================================================================
-// SalonLink — Cloud Firestore security rules (v2: accounts, roles, invites, catalogue & booking reads)
+// SalonLink — Cloud Firestore security rules (v7: roles, catalogue, booking engine, feed, waitlist, queue, style profile)
 // -------------------------------------------------------------------------------------
 // These rules run on Google's servers for EVERY read and write. They are the real
 // security boundary: even a modified app or a raw API call cannot get past them
@@ -96,6 +96,35 @@ service cloud.firestore {
 
       // Account deletion is not offered in v1.
       allow delete: if false;
+
+      // ---------- users/{uid}/style/profile: the style profile (v7, Phase 9) ----------
+      // Private to the customer. Sharing with a barber happens by copying the tags and note
+      // into a new booking's `note` (only when the customer switched sharing on), never by
+      // opening this document to staff.
+      match /style/{docId} {
+        allow read, delete: if isUser(uid);
+        allow create, update: if isUser(uid) && docId == 'profile'
+          && request.resource.data.keys().hasOnly(['tags', 'note', 'preferredStaffId', 'shareWithBarber', 'photoConsent', 'updatedAt'])
+          && request.resource.data.tags is list && request.resource.data.tags.size() <= 10
+          && request.resource.data.note is string && request.resource.data.note.size() <= 150
+          && (request.resource.data.preferredStaffId == null || request.resource.data.preferredStaffId is string)
+          && request.resource.data.shareWithBarber is bool
+          && request.resource.data.photoConsent is bool
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      // ---------- users/{uid}/photos: moodboard JPEGs (v7, Phase 9) ----------
+      // Only the customer sees them. Saving needs the photo consent in the style profile, and
+      // each photo is a small JPEG (no Cloud Storage on Spark, so the bytes live here).
+      match /photos/{photoId} {
+        allow read, delete: if isUser(uid);
+        allow create: if isUser(uid)
+          && get(/databases/$(database)/documents/users/$(uid)/style/profile).data.photoConsent == true
+          && request.resource.data.keys().hasOnly(['jpeg', 'label', 'createdAt'])
+          && request.resource.data.jpeg is bytes && request.resource.data.jpeg.size() <= 300000
+          && request.resource.data.label in ['PREVIOUS_RESULT', 'INSPIRATION']
+          && request.resource.data.createdAt == request.time;
+      }
 
       // ---------- users/{uid}/notifications: the in-app feed (Phase 5) ----------
       // No push server on Spark, so whoever causes an event writes a small document here and

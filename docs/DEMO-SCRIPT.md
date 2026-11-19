@@ -51,10 +51,19 @@ Tip: switching accounts is fastest with *Settings → Apps → SalonLink → Cle
 | Customer side: Explore, **Queue** | "Live queue: position and estimated start, from an anonymous board the staff app publishes." |
 | Services / Staff / Salon tabs | "The owner manages services, working hours, time off, invites and opening hours." |
 
-## 5. Wrap-up (about 1 min)
+## 5. My style and languages (about 2 min) · **customer**
+
+| Do | Say |
+|---|---|
+| My style: tick **Fade** + **Beard**, write a note, switch **Share my style** on, **Save** | "Kasun 100 % match, Nadeesha 19 %: 80 points for covered styles, 20 for rating." |
+| **Inspiration** → I agree → pick a photo | "Consent first; the photo is shrunk and stays private. The rules refuse photos without consent." |
+| Book with Kasun again; owner's schedule shows "Note: Style: Fade, Beard · …" | "Shared only because the customer switched it on." |
+| Language → **සිංහල**, then **தமிழ்**, open Explore | "Every customer screen is translated; the match tag too." Switch back to English after. |
+
+## 6. Wrap-up (about 1 min)
 
 - Architecture: MVVM + UDF, Hilt, Compose; Firebase Spark only (`docs/ARCHITECTURE.md`).
-- Tests: 131 unit + 75 rules + 5 UI tests (`docs/TEST-EVIDENCE.md`).
+- Tests: 138 unit + 78 rules + 5 UI tests (`docs/TEST-EVIDENCE.md`).
 - Honest limits: AI concierge on hold; no server push on Spark; waitlist offers are made by the cancelling device.
 
 ## If something goes wrong

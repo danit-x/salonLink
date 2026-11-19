@@ -69,6 +69,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    lint {
+        // WHY: Sinhala and Tamil cover the customer app (values-si, values-ta). Staff and owner
+        // screens are deliberately English-only for now, so their strings fall back to English.
+        disable += "MissingTranslation"
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true

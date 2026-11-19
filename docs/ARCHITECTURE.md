@@ -35,7 +35,7 @@ flowchart TB
 
     subgraph Firebase["Firebase Spark (free plan)"]
         AUTH["Authentication<br/>(email + password)"]
-        FS["Cloud Firestore<br/>+ security rules v6"]
+        FS["Cloud Firestore<br/>+ security rules v7"]
     end
 
     VM --> UC
@@ -56,6 +56,8 @@ flowchart TB
 | `domain/model` | `Booking`, `BookingStatus` (with its transition table), `Salon`, `Staff`, `WaitlistEntry`… |
 | `domain/booking` | `SlotGrid`, `AvailabilityCalculator`, `BookingPolicy` (60-day window, 24 h cancel rule) |
 | `domain/usecase` | Booking engine and waitlist use cases |
+| `domain/style` | `BarberMatcher`: 0–100 match score and the note shared with the barber |
+| `core/locale` | `LanguageStore`: English / Sinhala / Tamil, applied in `attachBaseContext` |
 | `data/firestore` | Mappers, `FirestoreSchema` (field names), Flow helpers, `awaitWrite()` |
 | `data/repository` | Firestore and Firebase Auth implementations |
 | `feature/*` | One folder per screen: `XxxScreen.kt` + `XxxViewModel.kt` |
@@ -70,6 +72,8 @@ erDiagram
     USER ||--o{ NOTIFICATION : "has feed"
     USER ||--o{ BOOKING : "books (customerId)"
     USER ||--o{ WAITLIST_ENTRY : "waits (customerId)"
+    USER ||--o| STYLE_PROFILE : "style/profile (private)"
+    USER ||--o{ PHOTO : "moodboard (private)"
     INVITE |o--o| USER : "gives role on sign-up"
     SALON ||--o{ SERVICE : offers
     SALON ||--o{ STAFF : employs
@@ -87,6 +91,18 @@ erDiagram
         string role "CUSTOMER | STAFF | OWNER"
         string salonId "staff/owner only"
         string staffId "staff only"
+    }
+    STYLE_PROFILE {
+        list tags "FADE, BEARD, ..."
+        string note "max 150"
+        string preferredStaffId
+        bool shareWithBarber "consent: copy into new bookings' note"
+        bool photoConsent
+    }
+    PHOTO {
+        string id PK
+        bytes jpeg "<= 300 KB"
+        string label "INSPIRATION | PREVIOUS_RESULT"
     }
     INVITE {
         string email PK "invites/{email}"

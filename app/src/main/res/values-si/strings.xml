@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Sinhala (සිංහල) translation of the customer app (Phase 9, NFR-07).
+    Salon staff and owner screens stay in English on purpose (see the lint block in
+    app/build.gradle.kts), so only customer-facing strings are here; anything missing falls back
+    to values/strings.xml.
+    Placeholders (%1$s, %1$d …) must stay exactly as in English.
+-->
+<resources>
+    <string name="cd_back">ආපසු</string>
+
+    <!-- Welcome -->
+    <string name="welcome_eyebrow">බුද්ධිමත් සැලොන් වෙන්කිරීම්</string>
+    <string name="welcome_headline">හොඳ හිසකෙස්.\nහොඳ ශක්තිය.</string>
+    <string name="welcome_body">ඔබේ බාබර්ව තට්ටු තුනකින් වෙන් කරන්න, සජීවී පෝලිම බලන්න, ඔබේ විලාස සටහන් එක තැනක තබා ගන්න.</string>
+    <string name="welcome_create_account">ගිණුමක් සාදන්න</string>
+    <string name="welcome_sign_in">මට දැනටමත් ගිණුමක් ඇත</string>
+
+    <!-- Shared auth -->
+    <string name="auth_email_label">ඊමේල්</string>
+    <string name="auth_password_label">මුරපදය</string>
+    <string name="auth_show_password">පෙන්වන්න</string>
+    <string name="auth_hide_password">සඟවන්න</string>
+
+    <!-- Sign in -->
+    <string name="signin_eyebrow">නැවත සාදරයෙන් පිළිගනිමු</string>
+    <string name="signin_headline">ඔබව නැවත\nදැකීම සතුටක්.</string>
+    <string name="signin_body">ඔබේ වෙන්කිරීම්, සජීවී පෝලිම සහ විලාස සටහන් බැලීමට පුරනය වන්න.</string>
+    <string name="signin_forgot_password">මුරපදය අමතකද?</string>
+    <string name="signin_reset_sent">%1$s සඳහා ගිණුමක් තිබේ නම්, මුරපදය යළි සැකසීමේ සබැඳියක් එවනු ලැබේ.</string>
+    <string name="signin_submit">පුරනය වන්න</string>
+    <string name="signin_no_account">SalonLink වෙත අලුත්ද?</string>
+    <string name="signin_create_account">ගිණුමක් සාදන්න</string>
+
+    <!-- Register -->
+    <string name="register_eyebrow">SalonLink හා එක්වන්න</string>
+    <string name="register_headline">ඔබව වෙන්\nකරගනිමු.</string>
+    <string name="register_body">වෙන්කිරීමට, අවලංගු කිරීමට සහ විලාස සටහන් තබා ගැනීමට එක් ගිණුමක්.</string>
+    <string name="register_name_label">සම්පූර්ණ නම</string>
+    <string name="register_name_placeholder">ඔබේ මුල් නම සහ වාසගම</string>
+    <string name="register_email_hint">සැලොන් කාර්ය මණ්ඩලය: සැලොන් එක ආරාධනා කළ ඊමේල් එක භාවිත කරන්න.</string>
+    <string name="register_phone_label">ජංගම අංකය (අත්‍යවශ්‍ය නැත)</string>
+    <string name="register_password_hint">අවම වශයෙන් අකුරු %1$d ක්.</string>
+    <string name="register_submit">ගිණුම සාදන්න</string>
+    <string name="register_have_account">දැනටමත් ගිණුමක් තිබේද?</string>
+    <string name="register_sign_in">පුරනය වන්න</string>
+
+    <!-- Field validation -->
+    <string name="field_error_required">මෙම ක්ෂේත්‍රය අවශ්‍යයි.</string>
+    <string name="field_error_too_long">මෙය ටිකක් දිගයි. කරුණාකර කෙටි කරන්න.</string>
+    <string name="field_error_invalid_email">වලංගු ඊමේල් ලිපිනයක් ඇතුළත් කරන්න.</string>
+    <string name="field_error_invalid_phone">ශ්‍රී ලංකා ජංගම අංකයක් භාවිත කරන්න, උදා. 077 123 4567.</string>
+    <string name="field_error_password_too_short">අවම වශයෙන් අකුරු 8 ක් භාවිත කරන්න.</string>
+
+    <!-- Auth errors -->
+    <string name="auth_error_invalid_credentials">ඊමේල් සහ මුරපදය නොගැළපේ. නැවත උත්සාහ කරන්න.</string>
+    <string name="auth_error_email_in_use">මෙම ඊමේල් සමඟ ගිණුමක් දැනටමත් ඇත. පුරනය වීමට උත්සාහ කරන්න.</string>
+    <string name="auth_error_weak_password">කරුණාකර වඩා ශක්තිමත් මුරපදයක් තෝරන්න.</string>
+    <string name="auth_error_network">සම්බන්ධතාවයක් නැත. අන්තර්ජාලය පරීක්ෂා කර නැවත උත්සාහ කරන්න.</string>
+    <string name="auth_error_too_many_attempts">උත්සාහයන් වැඩියි. මිනිත්තුවක් රැඳී නැවත උත්සාහ කරන්න.</string>
+    <string name="auth_error_permission_denied">ඔබේ ගිණුම සැකසිය නොහැකි විය. කරුණාකර සැලොන් එක අමතන්න.</string>
+    <string name="auth_error_unknown">යමක් වැරදුණා. නැවත උත්සාහ කරන්න.</string>
+
+    <!-- Roles and account -->
+    <string name="role_customer">පාරිභෝගික</string>
+    <string name="role_staff">කාර්ය මණ්ඩල සාමාජික</string>
+    <string name="role_owner">සැලොන් හිමිකරු</string>
+    <string name="sign_out">ඉවත් වන්න</string>
+    <string name="profile_missing_title">ඔබේ පැතිකඩ සොයාගත නොහැකි විය</string>
+    <string name="profile_missing_message">ඔබේ ගිණුම ඇතත් SalonLink පැතිකඩ නැත. ඉවත් වී නැවත ලියාපදිංචි වන්න, නැතහොත් සැලොන් එකෙන් උදව් ඉල්ලන්න.</string>
+    <string name="profile_missing_badge">ගිණුමේ ගැටලුවක්</string>
+    <string name="badge_on_hold">ඉදිරි නිකුතුවක</string>
+
+    <!-- Customer tabs -->
+    <string name="tab_explore">ගවේෂණය</string>
+    <string name="tab_bookings">වෙන්කිරීම්</string>
+    <string name="tab_concierge">සහායක</string>
+    <string name="tab_my_style">මගේ විලාසය</string>
+    <string name="concierge_on_hold_title">ඔබේ සැලොන් සහායක ළඟදීම පැමිණේ</string>
+    <string name="concierge_on_hold_message">චැට් මඟින් වෙන්කිරීම (\"හෙට 5 න් පසු කොණ්ඩය කැපීමක්\") පසු නිකුතුවක පැමිණේ. ඒ වන තුරු ගවේෂණයෙන් තට්ටු තුනකින් වෙන් කළ හැක.</string>
+
+    <!-- Shared -->
+    <string name="action_retry">නැවත උත්සාහ කරන්න</string>
+    <string name="label_today">අද</string>
+    <string name="label_tomorrow">හෙට</string>
+    <string name="label_total">එකතුව</string>
+    <string name="cd_photo_of">%1$s ගේ ඡායාරූපය</string>
+    <string name="cd_selected">තෝරා ඇත</string>
+    <string name="cd_not_selected">තෝරා නැත</string>
+
+    <!-- Data errors -->
+    <string name="data_error_network">සම්බන්ධතාවයක් නැත. අන්තර්ජාලය පරීක්ෂා කර නැවත උත්සාහ කරන්න.</string>
+    <string name="data_error_permission">ඔබට මෙයට ප්‍රවේශය නැත.</string>
+    <string name="data_error_not_found">එය සොයාගත නොහැකි විය. එය ඉවත් කර ඇති විය හැක.</string>
+    <string name="data_error_slot_taken">කවුරුන් හෝ දැන් එම වේලාව වෙන් කළා. කරුණාකර වෙනත් වේලාවක් තෝරන්න.</string>
+    <string name="data_error_not_allowed">එම වෙනස තවදුරටත් අවසර නැත.</string>
+    <string name="data_error_invalid">මෙම වෙන්කිරීමේ යමක් වලංගු නැත. ආපසු ගොස් නැවත උත්සාහ කරන්න.</string>
+    <string name="data_error_unknown">යමක් වැරදුණා. නැවත උත්සාහ කරන්න.</string>
+    <string name="slot_problem_closed">%1$s එදින වැඩ කරන්නේ නැත.</string>
+    <string name="slot_problem_outside_hours">එම වේලාව වැඩ කරන වේලාවෙන් පිටතයි.</string>
+    <string name="slot_problem_blocked">%1$s එවිට විවේකයේ. කරුණාකර වෙනත් වේලාවක් තෝරන්න.</string>
+    <string name="slot_problem_in_past">එම වේලාව දැනටමත් ගතවී ඇත. පසු වේලාවක් තෝරන්න.</string>
+    <string name="slot_problem_too_long">එක් පැමිණීමකට සේවා වැඩියි. සමහරක් වෙන වෙනම වෙන් කරන්න.</string>
+
+    <!-- Discovery -->
+    <string name="greeting_morning">සුබ උදෑසනක්, %1$s</string>
+    <string name="greeting_afternoon">සුබ දහවලක්, %1$s</string>
+    <string name="greeting_evening">සුබ සන්ධ්‍යාවක්, %1$s</string>
+    <string name="discovery_headline">හොඳ හිසකෙස්. හොඳ ශක්තිය.</string>
+    <string name="discovery_search_placeholder">සැලොන්, බාබර් හෝ විලාසය සොයන්න</string>
+    <string name="category_haircuts">කොණ්ඩ කැපීම්</string>
+    <string name="category_colour">වර්ණ</string>
+    <string name="category_beard">රැවුල</string>
+    <string name="category_all">සියලු විලාස</string>
+    <string name="discovery_featured_title">ඔබේ ඊළඟ හොඳ කැපීම</string>
+    <string name="discovery_tag_top_rated">ඉහළම ශ්‍රේණිගත</string>
+    <string name="discovery_featured_meta">★ %1$s (%2$d) · %3$s සිට</string>
+    <string name="discovery_see_times">වේලාවන් බලන්න ↗</string>
+    <string name="discovery_more_barbers">තවත් බාබර්වරු</string>
+    <string name="discovery_no_match">තවම ගැළපෙන බාබර් කෙනෙක් නැත. වෙනත් වචනයක් හෝ කාණ්ඩයක් උත්සාහ කරන්න.</string>
+    <string name="discovery_no_barbers">දැනට කිසිදු බාබර් කෙනෙක් වෙන්කිරීම් භාර ගන්නේ නැත.</string>
+    <string name="discovery_ask_title">SalonLink ගෙන් අහන්න</string>
+    <string name="discovery_ask_placeholder">හෙට සවස කොණ්ඩය කැපීමක් වෙන් කරන්න</string>
+    <string name="discovery_upcoming_title">ඉදිරි හමුව</string>
+    <string name="discovery_quick_actions">ඉක්මන් ක්‍රියා</string>
+    <string name="action_book">වෙන් කරන්න</string>
+    <string name="action_book_again">නැවත වෙන් කරන්න</string>
+    <string name="discovery_concierge_title">විලාස උපදෙස් ටිකක්?</string>
+    <string name="discovery_concierge_body">ඔබේ AI සැලොන් සහායක හමුවන්න. ඔබට ගැළපෙන පෙනුමක් සොයාගන්න.</string>
+    <string name="discovery_bookings_error">ඔබේ හමුවීම් මේ මොහොතේ පූරණය කළ නොහැකි විය.</string>
+
+    <!-- Barber profile -->
+    <string name="barber_title">ඔබේ බාබර් හමුවන්න</string>
+    <plurals name="barber_experience">
+        <item quantity="one">හොඳ හිසකෙස් වසර %1$d</item>
+        <item quantity="other">හොඳ හිසකෙස් වසර %1$d</item>
+    </plurals>
+    <plurals name="barber_salon_reviews">
+        <item quantity="one">%1$s  ·  සමාලෝචන %2$d</item>
+        <item quantity="other">%1$s  ·  සමාලෝචන %2$d</item>
+    </plurals>
+    <string name="barber_portfolio_title">කලාව, සමීපව</string>
+    <string name="cd_portfolio_photo">%1$s ගේ නිර්මාණය, ඡායාරූපය %2$d</string>
+    <string name="barber_book_with">%1$s සමඟ වෙන් කරන්න</string>
+    <string name="barber_footer">%1$s සිට  ·  පැය %2$d කට පෙර දක්වා නොමිලේ අවලංගු කළ හැක</string>
+
+    <!-- Booking flow -->
+    <string name="step_services">සේවා</string>
+    <string name="step_date_time">දිනය සහ වේලාව</string>
+    <string name="step_confirm">තහවුරු කරන්න</string>
+    <string name="services_title">ඔබේ වෙන්කිරීම</string>
+    <string name="services_step">පියවර 3 න් 1</string>
+    <string name="services_headline">ඔබටම ආවේණික කරන්න.</string>
+    <string name="services_body">නැවුම් කැපීමක්, පොඩි විස්තරයක්. ඔබට ගැළපෙන සේවා තෝරන්න.</string>
+    <string name="service_meta">මිනි. %1$d  ·  %2$s</string>
+    <plurals name="services_selected">
+        <item quantity="one">සේවා %1$d ක් තෝරා ඇත</item>
+        <item quantity="other">සේවා %1$d ක් තෝරා ඇත</item>
+    </plurals>
+    <string name="services_none_selected">සේවා තෝරා නැත</string>
+    <string name="services_duration">ඔබ වෙනුවෙන් මිනිත්තු %1$d</string>
+    <string name="services_pick_hint">එක් කිරීමට සේවාවක් තට්ටු කරන්න</string>
+    <string name="services_continue">දිනය සහ වේලාව තෝරන්න</string>
+    <string name="services_empty">%1$s ට දැනට වෙන් කළ හැකි සේවා නැත.</string>
+    <string name="datetime_title">ඔබේ හමුව</string>
+    <string name="datetime_step">පියවර 3 න් 2 · සේවා තෝරා ඇත</string>
+    <string name="datetime_headline">වේලාවක් තෝරන්න.</string>
+    <string name="datetime_body">%2$s හි %1$s සඳහා වේලාවක් තෝරන්න.</string>
+    <plurals name="datetime_barber_summary">
+        <item quantity="one">%1$s · සේවා %2$d · මිනි. %3$d · %4$s</item>
+        <item quantity="other">%1$s · සේවා %2$d · මිනි. %3$d · %4$s</item>
+    </plurals>
+    <string name="cd_previous_month">පෙර මාසය</string>
+    <string name="cd_next_month">ඊළඟ මාසය</string>
+    <string name="datetime_zone">කොළඹ · IST (UTC+5:30)</string>
+    <string name="datetime_ends_at">ඔබේ හමුව %1$s ට අවසන් වේ.</string>
+    <string name="datetime_no_slots">මෙදින නිදහස් වේලාවන් නැත. වෙනත් දිනයක් උත්සාහ කරන්න.</string>
+    <string name="datetime_day_off">%1$s මෙදින වැඩ කරන්නේ නැත. වෙනත් දිනයක් උත්සාහ කරන්න.</string>
+    <string name="datetime_pick_date">නිදහස් වේලාවන් බැලීමට දිනයක් තෝරන්න.</string>
+    <string name="datetime_pick_time">වේලාවක් තෝරන්න</string>
+    <string name="datetime_confirm">හමුව තහවුරු කරන්න</string>
+    <string name="datetime_payment_note">සැලොන් එකේදී ගෙවන්න · අනිවාර්ය මාර්ගගත ගෙවීමක් නැත</string>
+    <string name="cd_time_unavailable">%1$s, ලබා ගත නොහැක</string>
+
+    <!-- Booking confirmation -->
+    <string name="confirmation_title">සියල්ල වෙන් කළා</string>
+    <string name="confirmation_title_existing">ඔබේ වෙන්කිරීම</string>
+    <string name="confirmation_eyebrow">හොඳ හිසකෙස් දිනයක්</string>
+    <string name="confirmation_headline">%1$s, ඔබ ඇතුළත්.</string>
+    <string name="confirmation_body">%1$s ඔබව දැකීමට බලාපොරොත්තුවෙන්. ඔබේ ඊළඟ හොඳ පෙනුම දින දර්ශනයේ.</string>
+    <string name="confirmation_service_meta">මිනි. %1$d · %2$s සමඟ</string>
+    <string name="confirmation_pay_label">සැලොන් එකේදී ගෙවන්න</string>
+    <string name="confirmation_pay_methods">මුදල් / කාඩ්පත සැලොන් එකේදී</string>
+    <string name="confirmation_add_calendar">දින දර්ශනයට එක් කරන්න</string>
+    <string name="confirmation_view_booking">මගේ වෙන්කිරීම බලන්න</string>
+    <string name="confirmation_policy">සැලසුම් වෙනස් වේ. %1$s දක්වා නොමිලේ අවලංගු කළ හැක. මෙම වෙන්කිරීම වෙන්කිරීම් ටැබයේ ඇත.</string>
+    <string name="confirmation_policy_late">මෙම වෙන්කිරීම ඕනෑම විටෙක වෙන්කිරීම් ටැබයේ ඇත.</string>
+    <string name="confirmation_share_text">මගේ SalonLink වෙන්කිරීම: %3$s හි %2$s සමඟ %1$s, %4$s, %5$s.</string>
+    <string name="cd_share_booking">වෙන්කිරීම බෙදාගන්න</string>
+    <string name="calendar_event_title">%2$s හි %1$s</string>
+    <string name="no_app_for_action">මෙම දුරකථනයේ එය කළ හැකි යෙදුමක් නැත.</string>
+    <string name="status_booked">තහවුරුයි</string>
+    <string name="status_checked_in">පැමිණ ඇත</string>
+    <string name="status_waiting">රැඳී සිටී</string>
+    <string name="status_in_service">පුටුවේ</string>
+    <string name="status_completed">අවසන්</string>
+    <string name="status_cancelled">අවලංගුයි</string>
+    <string name="status_missed">මඟ හැරුණා</string>
+
+    <!-- My bookings -->
+    <string name="data_error_too_late_to_cancel">ඔබේ හමුවට පැය %1$d කට අඩුයි, එබැවින් යෙදුමෙන් අවලංගු කළ නොහැක. කරුණාකර සැලොන් එක අමතන්න.</string>
+    <string name="bookings_title">ඔබේ වෙන්කිරීම්</string>
+    <string name="bookings_tab_upcoming">ඉදිරි</string>
+    <string name="bookings_tab_history">ඉතිහාසය</string>
+    <string name="bookings_empty_upcoming">ඉදිරි පැමිණීම් නැත. ඔබේ ඊළඟ හොඳ කැපීම තට්ටු කිහිපයක් දුරින්.</string>
+    <string name="bookings_empty_history">පසුගිය සහ අවලංගු කළ වෙන්කිරීම් මෙහි පෙන්වයි.</string>
+    <string name="bookings_book_now">පැමිණීමක් වෙන් කරන්න</string>
+    <string name="bookings_with">%1$s සමඟ · %2$s</string>
+    <string name="bookings_cancelled_message">වෙන්කිරීම අවලංගු කළා. එම වේලාව දැන් වෙනත් කෙනෙකුට නිදහස්.</string>
+    <string name="action_cancel_booking">වෙන්කිරීම අවලංගු කරන්න</string>
+    <string name="action_keep_booking">තබා ගන්න</string>
+    <string name="cancel_dialog_title">මෙම වෙන්කිරීම අවලංගු කරන්නද?</string>
+    <string name="cancel_dialog_text">%3$s දින %2$s සමඟ %1$s. මෙය ආපසු හැරවිය නොහැක, නමුත් ඕනෑම විටෙක නැවත වෙන් කළ හැක.</string>
+    <string name="cancel_late_note">පැය %1$d කට අඩුයි: අවලංගු කිරීමට සැලොන් එක අමතන්න.</string>
+    <string name="call_salon">%1$s අමතන්න</string>
+
+    <!-- Notification feed -->
+    <string name="notifications_title">දැනුම්දීම්</string>
+    <string name="notifications_mark_all_read">සියල්ල කියවූ ලෙස සලකුණු කරන්න</string>
+    <string name="notifications_empty">අලුත් දෙයක් නැත. වෙන්කිරීම් යාවත්කාලීන සහ සිහිකැඳවීම් මෙහි පෙන්වයි.</string>
+    <string name="cd_notifications">දැනුම්දීම්</string>
+    <string name="cd_notifications_unread">දැනුම්දීම්, නොකියවූ %1$d</string>
+    <string name="notification_booking_confirmed">වෙන්කිරීම තහවුරුයි</string>
+    <string name="notification_booking_cancelled">වෙන්කිරීම අවලංගුයි</string>
+    <string name="notification_checked_in">ඔබ පැමිණ ඇති බව සටහන් කළා</string>
+    <string name="notification_in_service">ඔබ දැන් පුටුවේ</string>
+    <string name="notification_completed">සියල්ල අවසන්. පැමිණීමට ස්තූතියි!</string>
+    <string name="notification_missed">මඟ හැරුණු ලෙස සලකුණු කළා</string>
+    <string name="notification_status_other">ඔබේ වෙන්කිරීම යාවත්කාලීන විය</string>
+    <string name="notification_waitlist_offer">කලින් වේලාවක් නිදහස්</string>
+    <string name="notification_body">%1$s · %2$s සමඟ · %3$s, %4$s</string>
+    <string name="channel_reminders">හමුවීම් සිහිකැඳවීම්</string>
+    <string name="channel_updates">සැලොන් යාවත්කාලීන</string>
+    <string name="reminder_title_tomorrow">ඔබේ හමුව හෙටයි</string>
+    <string name="reminder_title_soon">ඔබේ හමුව ළඟයි</string>
+    <string name="reminder_text">%1$s · %2$s සමඟ · %3$s, %4$s</string>
+
+    <!-- Waitlist and live queue -->
+    <string name="waitlist_join">මෙදින සඳහා පොරොත්තු ලැයිස්තුවට එක්වන්න</string>
+    <string name="waitlist_join_hint">කවුරුන් හෝ අවලංගු කළොත් අපි ඔබට වේලාවක් පිරිනමමු.</string>
+    <string name="waitlist_joined">ඔබ %1$s සඳහා පොරොත්තු ලැයිස්තුවේ. වේලාවක් නිදහස් වුවහොත් දන්වන්නෙමු.</string>
+    <string name="waitlist_title">පොරොත්තු ලැයිස්තුව</string>
+    <string name="waitlist_waiting">%2$s සමඟ %1$s සඳහා රැඳී සිටී</string>
+    <string name="waitlist_offer_title">වේලාවක් නිදහස් විය: %1$s</string>
+    <string name="waitlist_offer_expires">පිරිනැමීම %1$s ට අවසන් · අනිත් අයටත් වෙන් කළ හැක, ඉක්මන් වන්න</string>
+    <string name="waitlist_accept">වෙන් කරන්න</string>
+    <string name="waitlist_decline">එපා, ස්තූතියි</string>
+    <string name="waitlist_leave">පොරොත්තු ලැයිස්තුවෙන් ඉවත් වන්න</string>
+    <string name="waitlist_accepted">වෙන් කළා! %1$s ට හමුවෙමු.</string>
+    <string name="waitlist_offer_body">%1$s · ඊළඟ මිනිත්තු 10 තුළ වෙන්කිරීම් ටැබයෙන් වෙන් කරන්න</string>
+    <string name="queue_title">සජීවී පෝලිම</string>
+    <string name="queue_open">සජීවී පෝලිම බලන්න</string>
+    <string name="queue_position">ඔබ #%1$d</string>
+    <string name="queue_in_chair">ඔබ දැන් පුටුවේ</string>
+    <string name="queue_done">මෙම පැමිණීම අවසන්</string>
+    <string name="queue_eta">අපේක්ෂිත ආරම්භය දළ වශයෙන් %1$s (මිනි. %2$d)</string>
+    <string name="queue_eta_now">ඊළඟට ඔබ. කරුණාකර ළඟින් සිටින්න.</string>
+    <string name="queue_ahead_title">ඔබට පෙර</string>
+    <string name="queue_ahead_in_chair">පුටුවේ</string>
+    <string name="queue_ahead_walk_in">ඇවිදින් පැමිණි · මිනි. %1$d</string>
+    <string name="queue_ahead_booked">%1$s වෙන් කළ · මිනි. %2$d</string>
+    <string name="queue_updated">සැලොන් එක විසින් %1$s යාවත්කාලීන කළා</string>
+    <string name="queue_unavailable">සැලොන් එක තවම සජීවී පෝලිම විවෘත කර නැත. ඔබේ වෙන් කළ වේලාව %1$s.</string>
+    <string name="queue_not_today">සජීවී පෝලිම ඔබේ පැමිණීමේ දිනයේ පෙන්වයි.</string>
+    <string name="action_queue">පෝලිම</string>
+    <string name="action_confirm">තහවුරු කරන්න</string>
+    <string name="action_back">ආපසු</string>
+    <string name="action_save">සුරකින්න</string>
+    <string name="action_cancel">අවලංගු කරන්න</string>
+
+    <!-- Phase 9: style profile -->
+    <string name="style_title">මගේ විලාසය</string>
+    <string name="style_headline">ඔබේ පෙනුම, ඔබේ වචන.</string>
+    <string name="style_tags_title">ඔබ කැමති විලාස</string>
+    <string name="style_tag_fade">ෆේඩ්</string>
+    <string name="style_tag_curly">රැලි / වයනය</string>
+    <string name="style_tag_colour">වර්ණ</string>
+    <string name="style_tag_beard">රැවුල</string>
+    <string name="style_tag_long">දිගු හිසකෙස්</string>
+    <string name="style_tag_treatment">හිසකෙස් ප්‍රතිකාර</string>
+    <string name="style_tag_classic">සම්භාව්‍ය කැපීම</string>
+    <string name="style_note_label">ඔබේ බාබර්ට සටහනක්</string>
+    <string name="style_note_placeholder">උදා. පහත් ෆේඩ්, උඩ දිග තබන්න</string>
+    <string name="style_share_label">මගේ විලාසය බාබර් සමඟ බෙදාගන්න</string>
+    <string name="style_share_on">ඔබේ විලාස සහ සටහන සෑම නව වෙන්කිරීමකටම එක් වේ, එදින ඔබේ බාබර්ට පෙනේ. ඡායාරූප කිසිදා බෙදා නොගනී.</string>
+    <string name="style_share_off">ඔබේ පැතිකඩ පෞද්ගලිකයි. නව වෙන්කිරීම් සමඟ විලාස සහ සටහන යැවීමට මෙය සක්‍රිය කරන්න.</string>
+    <string name="style_barber_title">ප්‍රියතම බාබර්</string>
+    <string name="style_barber_hint">ඔබේ විලාසවලට වඩාත් ගැළපෙන අය මුලින්. තේරීමට තට්ටු කරන්න; ඉවත් කිරීමට නැවත තට්ටු කරන්න.</string>
+    <string name="style_barber_hint_no_tags">ඔබට වඩාත් ගැළපෙන්නේ කවුදැයි බැලීමට ඉහතින් විලාස කිහිපයක් තෝරන්න.</string>
+    <string name="match_percent">%1$d%% ගැළපීම</string>
+    <string name="style_save">මගේ විලාසය සුරකින්න</string>
+    <string name="style_saved">සුරැකුණා. ඔබේ විලාසය යාවත්කාලීනයි.</string>
+    <string name="style_moodboard_title">මූඩ්බෝඩ්</string>
+    <string name="style_moodboard_body">ආදර්ශ සහ ඔබේ පසුගිය කැපීම්, ඡායාරූප %1$d ක් දක්වා. ඒවා ඔබට පමණක් පෙනේ; සැලොන් එකේදී ඔබේ දුරකථනයෙන් පෙන්වන්න.</string>
+    <string name="style_moodboard_empty">තවම ඡායාරූප නැත. ඔබ කැමති පෙනුමක් හෝ නැවත අවශ්‍ය කැපීමක් එක් කරන්න.</string>
+    <string name="style_add_inspiration">ආදර්ශය</string>
+    <string name="style_add_result">මගේ පසුගිය කැපීම</string>
+    <string name="style_label_inspiration">ආදර්ශය</string>
+    <string name="style_label_result">පසුගිය කැපීම</string>
+    <string name="style_photo_adding">ඔබේ ඡායාරූපය එක් කරමින්…</string>
+    <string name="style_photo_added">ඡායාරූපය මූඩ්බෝඩ් එකට එක් කළා.</string>
+    <string name="cd_delete_photo">මෙම ඡායාරූපය මකන්න</string>
+    <string name="style_consent_title">ඡායාරූප ඔබේ ගිණුමේ තබා ගන්නද?</string>
+    <string name="style_consent_text">ඔබේ ඡායාරූප කුඩා කර ඔබේ SalonLink ගිණුමේ ගබඩා කෙරේ. ඒවා ඔබට පමණක් පෙනේ, ඕනෑම ඡායාරූපයක් ඕනෑම විටෙක මැකිය හැක.</string>
+    <string name="style_consent_agree">මම එකඟයි</string>
+    <string name="language_title">භාෂාව</string>
+    <string name="language_system">දුරකථනයේ භාෂාව</string>
+    <string name="discovery_tag_best_match">ඔබට %1$d%% ගැළපීම</string>
+</resources>

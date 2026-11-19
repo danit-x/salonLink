@@ -305,7 +305,8 @@ private fun BarbersSection(state: DiscoveryUiState, actions: DiscoveryActions) {
                         ) {
                             BarberSummaryRow(
                                 staff = card.staff,
-                                detail = stringResource(R.string.salon_and_area, card.salon.name, card.salon.area),
+                                detail = stringResource(R.string.salon_and_area, card.salon.name, card.salon.area) +
+                                    card.match?.let { " · " + stringResource(R.string.match_percent, it) }.orEmpty(),
                             )
                         }
                     }
@@ -341,7 +342,8 @@ private fun FeaturedBarberCard(card: BarberCard, onClick: () -> Unit) {
                 .background(Brush.verticalGradient(0.45f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.62f))),
         )
         SalonTag(
-            text = stringResource(R.string.discovery_tag_top_rated),
+            text = card.match?.let { stringResource(R.string.discovery_tag_best_match, it) }
+                ?: stringResource(R.string.discovery_tag_top_rated),
             containerColor = colors.tealContainer,
             contentColor = colors.teal,
             icon = R.drawable.ic_sparkles,

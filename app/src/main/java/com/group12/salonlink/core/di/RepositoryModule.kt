@@ -58,4 +58,13 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindReminderScheduler(impl: com.group12.salonlink.data.reminder.WorkManagerReminderScheduler):
         com.group12.salonlink.domain.repository.ReminderScheduler
+
+    @Binds
+    @Singleton
+    abstract fun bindStyleRepository(impl: com.group12.salonlink.data.repository.FirestoreStyleRepository):
+        com.group12.salonlink.domain.repository.StyleRepository
+
+    @Binds
+    abstract fun bindPhotoCompressor(impl: com.group12.salonlink.data.image.AndroidPhotoCompressor):
+        com.group12.salonlink.domain.repository.PhotoCompressor
 }

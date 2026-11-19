@@ -20,6 +20,9 @@ import com.group12.salonlink.domain.model.Staff
 import com.group12.salonlink.domain.repository.AuthRepository
 import com.group12.salonlink.domain.repository.SalonRepository
 import com.group12.salonlink.domain.repository.WaitlistRepository
+import com.group12.salonlink.domain.repository.StyleRepository
+import com.group12.salonlink.domain.style.BarberMatcher
+import kotlinx.coroutines.withTimeoutOrNull
 import com.group12.salonlink.domain.model.WaitlistEntry
 import com.group12.salonlink.domain.model.WaitlistStatus
 import com.group12.salonlink.domain.usecase.BookingRequest
@@ -158,6 +161,7 @@ class BookingFlowViewModel @AssistedInject constructor(
     private val observeAvailability: ObserveAvailabilityUseCase,
     private val createBooking: CreateBookingUseCase,
     private val waitlistRepository: WaitlistRepository,
+    private val styleRepository: StyleRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -346,6 +350,17 @@ class BookingFlowViewModel @AssistedInject constructor(
         }
     }
 
+    /**
+     * The customer's styles and note for the barber, only if they switched sharing on (Phase 9).
+     * WHY best effort with a short wait: a missing note must never block or delay a booking.
+     */
+    private suspend fun styleNoteFor(uid: String): String? = try {
+        withTimeoutOrNull(STYLE_NOTE_WAIT_MS) { styleRepository.observeProfile(uid).first() }
+            ?.let(BarberMatcher::bookingNote)
+    } catch (_: DataException) {
+        null
+    }
+
     private fun confirm() {
         val state = uiState.value
         val start = state.selectedStart
@@ -365,6 +380,7 @@ class BookingFlowViewModel @AssistedInject constructor(
                         start = start,
                         customerId = user.uid,
                         customerName = user.name,
+                        note = styleNoteFor(user.uid),
                     ),
                 )
                 form.update { it.copy(submitting = false, confirmedBookingId = booking.id) }
@@ -377,6 +393,9 @@ class BookingFlowViewModel @AssistedInject constructor(
         }
     }
 }
+
+/** How long Confirm waits for the style profile before booking without a note. */
+private const val STYLE_NOTE_WAIT_MS = 2_000L
 
 /** True if both the salon and the barber work on [date] (their hours overlap). */
 internal fun workingDay(salon: Salon?, staff: Staff?, date: LocalDate): Boolean {

@@ -34,6 +34,28 @@ object FirestoreSchema {
     const val QUEUE = "queue"         // sub-collection of salons/{id}: one anonymous board per barber (Phase 7)
 
     // --- salons/{id}/waitlist/{id} fields ---
+    /** users/{uid}/style/profile (Phase 9). Private to the customer. */
+    const val STYLE = "style"
+    const val STYLE_PROFILE_DOC = "profile"
+
+    /** users/{uid}/photos/{id}: moodboard JPEGs stored as bytes (Phase 9). */
+    const val PHOTOS = "photos"
+
+    object StyleFields {
+        const val TAGS = "tags"                       // list of StyleTag names
+        const val NOTE = "note"
+        const val PREFERRED_STAFF_ID = "preferredStaffId"
+        const val SHARE_WITH_BARBER = "shareWithBarber"
+        const val PHOTO_CONSENT = "photoConsent"
+        const val UPDATED_AT = "updatedAt"
+    }
+
+    object PhotoFields {
+        const val JPEG = "jpeg"                       // Firestore Blob, at most ~300 KB
+        const val LABEL = "label"                     // PREVIOUS_RESULT | INSPIRATION
+        const val CREATED_AT = "createdAt"
+    }
+
     object WaitlistFields {
         const val CUSTOMER_ID = "customerId"
         const val STAFF_ID = "staffId"

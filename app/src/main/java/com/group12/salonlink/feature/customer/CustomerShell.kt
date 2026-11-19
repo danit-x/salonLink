@@ -1,6 +1,8 @@
 // Covers: customer navigation · Figma: bottom navigation (Explore / Bookings / Concierge / My style)
 package com.group12.salonlink.feature.customer
 
+import com.group12.salonlink.feature.customer.style.MyStyleScreen
+import com.group12.salonlink.feature.customer.style.MyStyleViewModel
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -46,7 +48,6 @@ import com.group12.salonlink.core.navigation.RoleShell
 import com.group12.salonlink.core.navigation.ServiceSelectionRoute
 import com.group12.salonlink.core.navigation.navigateToTab
 import com.group12.salonlink.domain.model.UserProfile
-import com.group12.salonlink.feature.account.AccountSummary
 import com.group12.salonlink.feature.customer.barber.BarberProfileScreen
 import com.group12.salonlink.feature.customer.barber.BarberProfileViewModel
 import com.group12.salonlink.feature.customer.booking.BookingFlowEvent
@@ -129,11 +130,9 @@ fun CustomerShell(
             )
         }
         composable<MyStyleRoute> {
-            AccountSummary(
-                user = user,
-                nextUpNote = stringResource(R.string.style_placeholder_message),
-                onSignOut = signOut,
-            )
+            val viewModel: MyStyleViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            MyStyleScreen(state = state, onEvent = viewModel::onEvent, onSignOut = signOut)
         }
         bookingJourney(navController)
     }

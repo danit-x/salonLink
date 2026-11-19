@@ -32,6 +32,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import com.group12.salonlink.domain.model.StyleProfile
+import com.group12.salonlink.domain.model.StyleTag
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -75,6 +77,8 @@ class BookingFlowViewModelTest {
     }
     private val availability = ObserveAvailabilityUseCase(salons, bookings, clock)
 
+    private val style = com.group12.salonlink.testing.FakeStyleRepository()
+
     private fun viewModel(preselected: List<String> = listOf("haircut", "beard")) = BookingFlowViewModel(
         args = BookingFlowRoute("aura", "kasun", preselected),
         salonRepository = salons,
@@ -82,6 +86,7 @@ class BookingFlowViewModelTest {
         observeAvailability = availability,
         createBooking = CreateBookingUseCase(salons, bookings, availability, notifications, clock),
         waitlistRepository = waitlist,
+        styleRepository = style,
         clock = clock,
     )
 
@@ -174,6 +179,25 @@ class BookingFlowViewModelTest {
     }
 
     @Test
+    fun `the style note goes on the booking only when the customer shares it`() = runTest {
+        style.profiles.value = mapOf(
+            "kavindu" to StyleProfile(tags = setOf(StyleTag.FADE), note = "Keep the top", shareWithBarber = false),
+        )
+        val private = viewModel().also { collect(it) }
+        private.onEvent(BookingFlowEvent.SelectTime(at(17, 30)))
+        private.onEvent(BookingFlowEvent.Confirm)
+        assertNull(bookings.bookings.value.getValue(private.uiState.value.confirmedBookingId!!).note)
+
+        style.profiles.value = mapOf(
+            "kavindu" to StyleProfile(tags = setOf(StyleTag.FADE), note = "Keep the top", shareWithBarber = true),
+        )
+        val shared = viewModel().also { collect(it) }
+        shared.onEvent(BookingFlowEvent.SelectTime(at(16, 0)))
+        shared.onEvent(BookingFlowEvent.Confirm)
+        assertEquals("Style: Fade · Keep the top", bookings.bookings.value.getValue(shared.uiState.value.confirmedBookingId!!).note)
+    }
+
+    @Test
     fun `T03 - losing the race explains why and clears the time`() = runTest {
         val vm = viewModel().also { collect(it) }
         vm.onEvent(BookingFlowEvent.SelectTime(at(17, 30)))
@@ -213,6 +237,7 @@ class BookingFlowViewModelTest {
             observeAvailability = availability,
             createBooking = CreateBookingUseCase(salons, bookings, availability, notifications, clock),
             waitlistRepository = waitlist,
+            styleRepository = style,
             clock = clock,
         ).also { collect(it) }
         assertEquals(DataError.NOT_FOUND, vm.uiState.value.loadError)

@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tamil (தமிழ்) translation of the customer app (Phase 9, NFR-07).
+    Salon staff and owner screens stay in English on purpose (see the lint block in
+    app/build.gradle.kts), so only customer-facing strings are here; anything missing falls back
+    to values/strings.xml. Placeholders (%1$s, %1$d …) must stay exactly as in English.
+-->
+<resources>
+    <string name="cd_back">பின்செல்</string>
+
+    <!-- Welcome -->
+    <string name="welcome_eyebrow">அறிவார்ந்த சலூன் முன்பதிவு</string>
+    <string name="welcome_headline">நல்ல முடி.\nநல்ல ஆற்றல்.</string>
+    <string name="welcome_body">உங்கள் முடிதிருத்துநரை மூன்று தட்டல்களில் முன்பதிவு செய்யுங்கள், நேரடி வரிசையைப் பாருங்கள், உங்கள் ஸ்டைல் குறிப்புகளை ஒரே இடத்தில் வைத்திருங்கள்.</string>
+    <string name="welcome_create_account">கணக்கை உருவாக்கு</string>
+    <string name="welcome_sign_in">எனக்கு ஏற்கனவே கணக்கு உள்ளது</string>
+
+    <!-- Shared auth -->
+    <string name="auth_email_label">மின்னஞ்சல்</string>
+    <string name="auth_password_label">கடவுச்சொல்</string>
+    <string name="auth_show_password">காட்டு</string>
+    <string name="auth_hide_password">மறை</string>
+
+    <!-- Sign in -->
+    <string name="signin_eyebrow">மீண்டும் வருக</string>
+    <string name="signin_headline">உங்களை மீண்டும்\nகாண்பதில் மகிழ்ச்சி.</string>
+    <string name="signin_body">உங்கள் முன்பதிவுகள், நேரடி வரிசை மற்றும் ஸ்டைல் குறிப்புகளைக் காண உள்நுழையுங்கள்.</string>
+    <string name="signin_forgot_password">கடவுச்சொல் மறந்துவிட்டதா?</string>
+    <string name="signin_reset_sent">%1$s க்கு கணக்கு இருந்தால், கடவுச்சொல் மீட்டமைப்பு இணைப்பு அனுப்பப்படும்.</string>
+    <string name="signin_submit">உள்நுழை</string>
+    <string name="signin_no_account">SalonLink க்கு புதியவரா?</string>
+    <string name="signin_create_account">கணக்கை உருவாக்கு</string>
+
+    <!-- Register -->
+    <string name="register_eyebrow">SalonLink இல் இணையுங்கள்</string>
+    <string name="register_headline">உங்களை முன்பதிவு\nசெய்வோம்.</string>
+    <string name="register_body">முன்பதிவு, ரத்து மற்றும் ஸ்டைல் குறிப்புகளுக்கு ஒரே கணக்கு.</string>
+    <string name="register_name_label">முழுப் பெயர்</string>
+    <string name="register_name_placeholder">உங்கள் முதல் மற்றும் கடைசி பெயர்</string>
+    <string name="register_email_hint">சலூன் ஊழியர்கள்: உங்கள் சலூன் அழைத்த மின்னஞ்சலைப் பயன்படுத்துங்கள்.</string>
+    <string name="register_phone_label">கைபேசி எண் (விருப்பத்தேர்வு)</string>
+    <string name="register_password_hint">குறைந்தது %1$d எழுத்துகள்.</string>
+    <string name="register_submit">கணக்கை உருவாக்கு</string>
+    <string name="register_have_account">ஏற்கனவே கணக்கு உள்ளதா?</string>
+    <string name="register_sign_in">உள்நுழை</string>
+
+    <!-- Field validation -->
+    <string name="field_error_required">இந்தப் புலம் தேவை.</string>
+    <string name="field_error_too_long">இது சற்று நீளமாக உள்ளது. சுருக்கவும்.</string>
+    <string name="field_error_invalid_email">சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.</string>
+    <string name="field_error_invalid_phone">இலங்கை கைபேசி எண்ணைப் பயன்படுத்தவும், எ.கா. 077 123 4567.</string>
+    <string name="field_error_password_too_short">குறைந்தது 8 எழுத்துகளைப் பயன்படுத்தவும்.</string>
+
+    <!-- Auth errors -->
+    <string name="auth_error_invalid_credentials">மின்னஞ்சலும் கடவுச்சொல்லும் பொருந்தவில்லை. மீண்டும் முயலவும்.</string>
+    <string name="auth_error_email_in_use">இந்த மின்னஞ்சலுடன் ஏற்கனவே கணக்கு உள்ளது. உள்நுழைய முயலவும்.</string>
+    <string name="auth_error_weak_password">வலுவான கடவுச்சொல்லைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="auth_error_network">இணைப்பு இல்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயலவும்.</string>
+    <string name="auth_error_too_many_attempts">அதிக முயற்சிகள். ஒரு நிமிடம் காத்திருந்து மீண்டும் முயலவும்.</string>
+    <string name="auth_error_permission_denied">உங்கள் கணக்கை அமைக்க முடியவில்லை. சலூனைத் தொடர்பு கொள்ளவும்.</string>
+    <string name="auth_error_unknown">ஏதோ தவறு நடந்தது. மீண்டும் முயலவும்.</string>
+
+    <!-- Roles and account -->
+    <string name="role_customer">வாடிக்கையாளர்</string>
+    <string name="role_staff">ஊழியர்</string>
+    <string name="role_owner">சலூன் உரிமையாளர்</string>
+    <string name="sign_out">வெளியேறு</string>
+    <string name="profile_missing_title">உங்கள் சுயவிவரத்தைக் கண்டுபிடிக்க முடியவில்லை</string>
+    <string name="profile_missing_message">உங்கள் கணக்கு உள்ளது, ஆனால் SalonLink சுயவிவரம் இல்லை. வெளியேறி மீண்டும் பதிவு செய்யவும், அல்லது சலூனிடம் உதவி கேட்கவும்.</string>
+    <string name="profile_missing_badge">கணக்குச் சிக்கல்</string>
+    <string name="badge_on_hold">வருங்கால வெளியீடு</string>
+
+    <!-- Customer tabs -->
+    <string name="tab_explore">ஆராய்</string>
+    <string name="tab_bookings">முன்பதிவுகள்</string>
+    <string name="tab_concierge">உதவியாளர்</string>
+    <string name="tab_my_style">என் ஸ்டைல்</string>
+    <string name="concierge_on_hold_title">உங்கள் சலூன் உதவியாளர் விரைவில் வருகிறார்</string>
+    <string name="concierge_on_hold_message">அரட்டை மூலம் முன்பதிவு (\"நாளை 5 மணிக்குப் பிறகு முடிவெட்டு\") பின்னர் வரும். அதுவரை ஆராய் பக்கத்தில் மூன்று தட்டல்களில் முன்பதிவு செய்யலாம்.</string>
+
+    <!-- Shared -->
+    <string name="action_retry">மீண்டும் முயல்</string>
+    <string name="label_today">இன்று</string>
+    <string name="label_tomorrow">நாளை</string>
+    <string name="label_total">மொத்தம்</string>
+    <string name="cd_photo_of">%1$s இன் புகைப்படம்</string>
+    <string name="cd_selected">தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="cd_not_selected">தேர்ந்தெடுக்கப்படவில்லை</string>
+
+    <!-- Data errors -->
+    <string name="data_error_network">இணைப்பு இல்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயலவும்.</string>
+    <string name="data_error_permission">இதை அணுக உங்களுக்கு அனுமதி இல்லை.</string>
+    <string name="data_error_not_found">அதைக் கண்டுபிடிக்க முடியவில்லை. அது நீக்கப்பட்டிருக்கலாம்.</string>
+    <string name="data_error_slot_taken">யாரோ இப்போதுதான் அந்த நேரத்தை முன்பதிவு செய்தார். வேறு நேரத்தைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="data_error_not_allowed">அந்த மாற்றம் இனி அனுமதிக்கப்படாது.</string>
+    <string name="data_error_invalid">இந்த முன்பதிவில் ஏதோ சரியில்லை. பின்சென்று மீண்டும் முயலவும்.</string>
+    <string name="data_error_unknown">ஏதோ தவறு நடந்தது. மீண்டும் முயலவும்.</string>
+    <string name="slot_problem_closed">%1$s அன்று பணியில் இல்லை.</string>
+    <string name="slot_problem_outside_hours">அந்த நேரம் பணி நேரத்திற்கு வெளியே உள்ளது.</string>
+    <string name="slot_problem_blocked">%1$s அப்போது இடைவேளையில் இருப்பார். வேறு நேரத்தைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="slot_problem_in_past">அந்த நேரம் கடந்துவிட்டது. பிந்தைய நேரத்தைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="slot_problem_too_long">ஒரு வருகைக்கு அதிக சேவைகள். சிலவற்றைத் தனியாக முன்பதிவு செய்யவும்.</string>
+
+    <!-- Discovery -->
+    <string name="greeting_morning">காலை வணக்கம், %1$s</string>
+    <string name="greeting_afternoon">மதிய வணக்கம், %1$s</string>
+    <string name="greeting_evening">மாலை வணக்கம், %1$s</string>
+    <string name="discovery_headline">நல்ல முடி. நல்ல ஆற்றல்.</string>
+    <string name="discovery_search_placeholder">சலூன், முடிதிருத்துநர் அல்லது ஸ்டைலைத் தேடுங்கள்</string>
+    <string name="category_haircuts">முடிவெட்டு</string>
+    <string name="category_colour">நிறம்</string>
+    <string name="category_beard">தாடி</string>
+    <string name="category_all">அனைத்து ஸ்டைல்கள்</string>
+    <string name="discovery_featured_title">உங்கள் அடுத்த சிறந்த முடிவெட்டு</string>
+    <string name="discovery_tag_top_rated">உயர் மதிப்பீடு</string>
+    <string name="discovery_featured_meta">★ %1$s (%2$d) · %3$s முதல்</string>
+    <string name="discovery_see_times">நேரங்களைப் பார் ↗</string>
+    <string name="discovery_more_barbers">மேலும் முடிதிருத்துநர்கள்</string>
+    <string name="discovery_no_match">இன்னும் பொருந்தும் முடிதிருத்துநர் இல்லை. வேறு சொல் அல்லது வகையை முயலவும்.</string>
+    <string name="discovery_no_barbers">தற்போது எந்த முடிதிருத்துநரும் முன்பதிவுகளை ஏற்கவில்லை.</string>
+    <string name="discovery_ask_title">SalonLink இடம் கேளுங்கள்</string>
+    <string name="discovery_ask_placeholder">நாளை மாலை முடிவெட்டு முன்பதிவு செய்</string>
+    <string name="discovery_upcoming_title">வரவிருக்கும் சந்திப்பு</string>
+    <string name="discovery_quick_actions">விரைவுச் செயல்கள்</string>
+    <string name="action_book">முன்பதிவு</string>
+    <string name="action_book_again">மீண்டும் முன்பதிவு</string>
+    <string name="discovery_concierge_title">கொஞ்சம் ஸ்டைல் வழிகாட்டல்?</string>
+    <string name="discovery_concierge_body">உங்கள் AI சலூன் உதவியாளரைச் சந்தியுங்கள். உங்களுக்கேற்ற தோற்றத்தைக் கண்டறியுங்கள்.</string>
+    <string name="discovery_bookings_error">உங்கள் சந்திப்புகளை இப்போது ஏற்ற முடியவில்லை.</string>
+
+    <!-- Barber profile -->
+    <string name="barber_title">உங்கள் முடிதிருத்துநரைச் சந்தியுங்கள்</string>
+    <plurals name="barber_experience">
+        <item quantity="one">%1$d ஆண்டு நல்ல முடி</item>
+        <item quantity="other">%1$d ஆண்டுகள் நல்ல முடி</item>
+    </plurals>
+    <plurals name="barber_salon_reviews">
+        <item quantity="one">%1$s  ·  %2$d மதிப்புரை</item>
+        <item quantity="other">%1$s  ·  %2$d மதிப்புரைகள்</item>
+    </plurals>
+    <string name="barber_portfolio_title">கைவண்ணம், அருகில்</string>
+    <string name="cd_portfolio_photo">%1$s இன் வேலை, புகைப்படம் %2$d</string>
+    <string name="barber_book_with">%1$s உடன் முன்பதிவு</string>
+    <string name="barber_footer">%1$s முதல்  ·  %2$d மணி நேரம் முன்பு வரை இலவச ரத்து</string>
+
+    <!-- Booking flow -->
+    <string name="step_services">சேவைகள்</string>
+    <string name="step_date_time">தேதி &amp; நேரம்</string>
+    <string name="step_confirm">உறுதிசெய்</string>
+    <string name="services_title">உங்கள் முன்பதிவு</string>
+    <string name="services_step">படி 1 / 3</string>
+    <string name="services_headline">உங்களுக்கேற்றதாக்குங்கள்.</string>
+    <string name="services_body">புதிய முடிவெட்டு, சிறு நுணுக்கம். உங்களுக்குப் பொருத்தமான சேவைகளைத் தேர்ந்தெடுங்கள்.</string>
+    <string name="service_meta">%1$d நிமி  ·  %2$s</string>
+    <plurals name="services_selected">
+        <item quantity="one">%1$d சேவை தேர்ந்தெடுக்கப்பட்டது</item>
+        <item quantity="other">%1$d சேவைகள் தேர்ந்தெடுக்கப்பட்டன</item>
+    </plurals>
+    <string name="services_none_selected">சேவைகள் தேர்ந்தெடுக்கப்படவில்லை</string>
+    <string name="services_duration">உங்களுக்காக %1$d நிமிடங்கள்</string>
+    <string name="services_pick_hint">சேர்க்க ஒரு சேவையைத் தட்டவும்</string>
+    <string name="services_continue">தேதி &amp; நேரத்தைத் தேர்ந்தெடு</string>
+    <string name="services_empty">%1$s க்கு தற்போது முன்பதிவு செய்யக்கூடிய சேவைகள் இல்லை.</string>
+    <string name="datetime_title">உங்கள் சந்திப்பு</string>
+    <string name="datetime_step">படி 2 / 3 · சேவைகள் தேர்ந்தெடுக்கப்பட்டன</string>
+    <string name="datetime_headline">நேரத்தைத் தேர்ந்தெடுங்கள்.</string>
+    <string name="datetime_body">%2$s இல் %1$s க்கான நேரத்தைத் தேர்ந்தெடுங்கள்.</string>
+    <plurals name="datetime_barber_summary">
+        <item quantity="one">%1$s · %2$d சேவை · %3$d நிமி · %4$s</item>
+        <item quantity="other">%1$s · %2$d சேவைகள் · %3$d நிமி · %4$s</item>
+    </plurals>
+    <string name="cd_previous_month">முந்தைய மாதம்</string>
+    <string name="cd_next_month">அடுத்த மாதம்</string>
+    <string name="datetime_zone">கொழும்பு · IST (UTC+5:30)</string>
+    <string name="datetime_ends_at">உங்கள் சந்திப்பு %1$s க்கு முடிவடையும்.</string>
+    <string name="datetime_no_slots">இந்த நாளில் இலவச நேரங்கள் இல்லை. வேறு தேதியை முயலவும்.</string>
+    <string name="datetime_day_off">%1$s இந்த நாளில் பணியில் இல்லை. வேறு தேதியை முயலவும்.</string>
+    <string name="datetime_pick_date">இலவச நேரங்களைக் காண ஒரு நாளைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="datetime_pick_time">நேரத்தைத் தேர்ந்தெடு</string>
+    <string name="datetime_confirm">சந்திப்பை உறுதிசெய்</string>
+    <string name="datetime_payment_note">சலூனில் செலுத்துங்கள் · கட்டாய இணையக் கட்டணம் இல்லை</string>
+    <string name="cd_time_unavailable">%1$s, கிடைக்கவில்லை</string>
+
+    <!-- Booking confirmation -->
+    <string name="confirmation_title">முன்பதிவு முடிந்தது</string>
+    <string name="confirmation_title_existing">உங்கள் முன்பதிவு</string>
+    <string name="confirmation_eyebrow">இது ஒரு நல்ல முடி நாள்</string>
+    <string name="confirmation_headline">%1$s, நீங்கள் உள்ளே.</string>
+    <string name="confirmation_body">%1$s உங்களைச் சந்திக்க ஆவலாக உள்ளார். உங்கள் அடுத்த சிறந்த தோற்றம் நாட்காட்டியில் உள்ளது.</string>
+    <string name="confirmation_service_meta">%1$d நிமி · %2$s உடன்</string>
+    <string name="confirmation_pay_label">சலூனில் செலுத்துங்கள்</string>
+    <string name="confirmation_pay_methods">பணம் / அட்டை சலூனில்</string>
+    <string name="confirmation_add_calendar">நாட்காட்டியில் சேர்</string>
+    <string name="confirmation_view_booking">என் முன்பதிவைப் பார்</string>
+    <string name="confirmation_policy">திட்டங்கள் மாறலாம். %1$s வரை இலவசமாக ரத்து செய்யலாம். இந்த முன்பதிவு முன்பதிவுகள் பக்கத்தில் உள்ளது.</string>
+    <string name="confirmation_policy_late">இந்த முன்பதிவை எப்போதும் முன்பதிவுகள் பக்கத்தில் காணலாம்.</string>
+    <string name="confirmation_share_text">என் SalonLink முன்பதிவு: %3$s இல் %2$s உடன் %1$s, %4$s, %5$s.</string>
+    <string name="cd_share_booking">முன்பதிவைப் பகிர்</string>
+    <string name="calendar_event_title">%2$s இல் %1$s</string>
+    <string name="no_app_for_action">இந்தத் தொலைபேசியில் அதைச் செய்யக்கூடிய செயலி இல்லை.</string>
+    <string name="status_booked">உறுதிசெய்யப்பட்டது</string>
+    <string name="status_checked_in">வருகை பதிவானது</string>
+    <string name="status_waiting">காத்திருக்கிறது</string>
+    <string name="status_in_service">நாற்காலியில்</string>
+    <string name="status_completed">முடிந்தது</string>
+    <string name="status_cancelled">ரத்து செய்யப்பட்டது</string>
+    <string name="status_missed">தவறவிட்டது</string>
+
+    <!-- My bookings -->
+    <string name="data_error_too_late_to_cancel">உங்கள் சந்திப்புக்கு %1$d மணி நேரத்திற்கும் குறைவு, எனவே செயலியில் ரத்து செய்ய முடியாது. சலூனை அழைக்கவும்.</string>
+    <string name="bookings_title">உங்கள் முன்பதிவுகள்</string>
+    <string name="bookings_tab_upcoming">வரவிருப்பவை</string>
+    <string name="bookings_tab_history">வரலாறு</string>
+    <string name="bookings_empty_upcoming">வரவிருக்கும் வருகைகள் இல்லை. உங்கள் அடுத்த சிறந்த முடிவெட்டு சில தட்டல்கள் தூரத்தில்.</string>
+    <string name="bookings_empty_history">முந்தைய மற்றும் ரத்தான முன்பதிவுகள் இங்கே தோன்றும்.</string>
+    <string name="bookings_book_now">வருகையை முன்பதிவு செய்</string>
+    <string name="bookings_with">%1$s உடன் · %2$s</string>
+    <string name="bookings_cancelled_message">முன்பதிவு ரத்து செய்யப்பட்டது. அந்த நேரம் இப்போது வேறொருவருக்குக் கிடைக்கும்.</string>
+    <string name="action_cancel_booking">முன்பதிவை ரத்து செய்</string>
+    <string name="action_keep_booking">வைத்திரு</string>
+    <string name="cancel_dialog_title">இந்த முன்பதிவை ரத்து செய்யவா?</string>
+    <string name="cancel_dialog_text">%3$s அன்று %2$s உடன் %1$s. இதைத் திரும்பப் பெற முடியாது, ஆனால் எப்போது வேண்டுமானாலும் மீண்டும் முன்பதிவு செய்யலாம்.</string>
+    <string name="cancel_late_note">%1$d மணி நேரத்திற்கும் குறைவு: ரத்து செய்ய சலூனை அழைக்கவும்.</string>
+    <string name="call_salon">%1$s ஐ அழை</string>
+
+    <!-- Notification feed -->
+    <string name="notifications_title">அறிவிப்புகள்</string>
+    <string name="notifications_mark_all_read">அனைத்தையும் படித்ததாகக் குறி</string>
+    <string name="notifications_empty">புதிதாக எதுவும் இல்லை. முன்பதிவு புதுப்பிப்புகளும் நினைவூட்டல்களும் இங்கே தோன்றும்.</string>
+    <string name="cd_notifications">அறிவிப்புகள்</string>
+    <string name="cd_notifications_unread">அறிவிப்புகள், %1$d படிக்காதவை</string>
+    <string name="notification_booking_confirmed">முன்பதிவு உறுதிசெய்யப்பட்டது</string>
+    <string name="notification_booking_cancelled">முன்பதிவு ரத்து செய்யப்பட்டது</string>
+    <string name="notification_checked_in">உங்கள் வருகை பதிவானது</string>
+    <string name="notification_in_service">நீங்கள் நாற்காலியில் உள்ளீர்கள்</string>
+    <string name="notification_completed">எல்லாம் முடிந்தது. வருகைக்கு நன்றி!</string>
+    <string name="notification_missed">தவறவிட்டதாகக் குறிக்கப்பட்டது</string>
+    <string name="notification_status_other">உங்கள் முன்பதிவு புதுப்பிக்கப்பட்டது</string>
+    <string name="notification_waitlist_offer">முந்தைய நேரம் கிடைக்கிறது</string>
+    <string name="notification_body">%1$s · %2$s உடன் · %3$s, %4$s</string>
+    <string name="channel_reminders">சந்திப்பு நினைவூட்டல்கள்</string>
+    <string name="channel_updates">சலூன் புதுப்பிப்புகள்</string>
+    <string name="reminder_title_tomorrow">உங்கள் சந்திப்பு நாளை</string>
+    <string name="reminder_title_soon">உங்கள் சந்திப்பு விரைவில்</string>
+    <string name="reminder_text">%1$s · %2$s உடன் · %3$s, %4$s</string>
+
+    <!-- Waitlist and live queue -->
+    <string name="waitlist_join">இந்த நாளுக்கான காத்திருப்புப் பட்டியலில் சேரு</string>
+    <string name="waitlist_join_hint">யாராவது ரத்து செய்தால் உங்களுக்கு ஒரு நேரத்தை வழங்குவோம்.</string>
+    <string name="waitlist_joined">நீங்கள் %1$s க்கான காத்திருப்புப் பட்டியலில் உள்ளீர்கள். நேரம் கிடைத்தால் தெரிவிப்போம்.</string>
+    <string name="waitlist_title">காத்திருப்புப் பட்டியல்</string>
+    <string name="waitlist_waiting">%2$s உடன் %1$s க்காகக் காத்திருக்கிறது</string>
+    <string name="waitlist_offer_title">ஒரு நேரம் கிடைத்தது: %1$s</string>
+    <string name="waitlist_offer_expires">வாய்ப்பு %1$s க்கு முடிவடையும் · மற்றவர்களும் முன்பதிவு செய்யலாம், விரைவாக</string>
+    <string name="waitlist_accept">முன்பதிவு செய்</string>
+    <string name="waitlist_decline">வேண்டாம், நன்றி</string>
+    <string name="waitlist_leave">காத்திருப்புப் பட்டியலிலிருந்து விலகு</string>
+    <string name="waitlist_accepted">முன்பதிவானது! %1$s க்குச் சந்திப்போம்.</string>
+    <string name="waitlist_offer_body">%1$s · அடுத்த 10 நிமிடங்களில் முன்பதிவுகள் பக்கத்தில் முன்பதிவு செய்யுங்கள்</string>
+    <string name="queue_title">நேரடி வரிசை</string>
+    <string name="queue_open">நேரடி வரிசையைப் பார்</string>
+    <string name="queue_position">நீங்கள் #%1$d</string>
+    <string name="queue_in_chair">நீங்கள் நாற்காலியில் உள்ளீர்கள்</string>
+    <string name="queue_done">இந்த வருகை முடிந்தது</string>
+    <string name="queue_eta">எதிர்பார்க்கப்படும் தொடக்கம் சுமார் %1$s (%2$d நிமி)</string>
+    <string name="queue_eta_now">அடுத்தது நீங்கள். அருகில் இருங்கள்.</string>
+    <string name="queue_ahead_title">உங்களுக்கு முன்</string>
+    <string name="queue_ahead_in_chair">நாற்காலியில்</string>
+    <string name="queue_ahead_walk_in">நேரடி வருகை · %1$d நிமி</string>
+    <string name="queue_ahead_booked">%1$s முன்பதிவு · %2$d நிமி</string>
+    <string name="queue_updated">சலூனால் %1$s புதுப்பிக்கப்பட்டது</string>
+    <string name="queue_unavailable">சலூன் இன்னும் நேரடி வரிசையைத் திறக்கவில்லை. உங்கள் முன்பதிவு நேரம் %1$s.</string>
+    <string name="queue_not_today">நேரடி வரிசை உங்கள் வருகை நாளில் தோன்றும்.</string>
+    <string name="action_queue">வரிசை</string>
+    <string name="action_confirm">உறுதிசெய்</string>
+    <string name="action_back">பின்செல்</string>
+    <string name="action_save">சேமி</string>
+    <string name="action_cancel">ரத்து செய்</string>
+
+    <!-- Phase 9: style profile -->
+    <string name="style_title">என் ஸ்டைல்</string>
+    <string name="style_headline">உங்கள் தோற்றம், உங்கள் வார்த்தைகள்.</string>
+    <string name="style_tags_title">நீங்கள் விரும்பும் ஸ்டைல்கள்</string>
+    <string name="style_tag_fade">ஃபேட்</string>
+    <string name="style_tag_curly">சுருள் / அமைப்பு</string>
+    <string name="style_tag_colour">நிறம்</string>
+    <string name="style_tag_beard">தாடி</string>
+    <string name="style_tag_long">நீண்ட முடி</string>
+    <string name="style_tag_treatment">முடி சிகிச்சை</string>
+    <string name="style_tag_classic">கிளாசிக் முடிவெட்டு</string>
+    <string name="style_note_label">உங்கள் முடிதிருத்துநருக்கு குறிப்பு</string>
+    <string name="style_note_placeholder">எ.கா. குறைந்த ஃபேட், மேலே நீளம் வை</string>
+    <string name="style_share_label">என் ஸ்டைலை முடிதிருத்துநருடன் பகிர்</string>
+    <string name="style_share_on">உங்கள் ஸ்டைல்களும் குறிப்பும் ஒவ்வொரு புதிய முன்பதிவிலும் சேர்க்கப்படும், அன்று உங்கள் முடிதிருத்துநர் காண்பார். புகைப்படங்கள் ஒருபோதும் பகிரப்படாது.</string>
+    <string name="style_share_off">உங்கள் சுயவிவரம் தனிப்பட்டது. புதிய முன்பதிவுகளுடன் ஸ்டைல்களையும் குறிப்பையும் அனுப்ப இதை இயக்கவும்.</string>
+    <string name="style_barber_title">விருப்பமான முடிதிருத்துநர்</string>
+    <string name="style_barber_hint">உங்கள் ஸ்டைல்களுக்கு மிகவும் பொருந்துபவர் முதலில். தேர்ந்தெடுக்கத் தட்டவும்; அழிக்க மீண்டும் தட்டவும்.</string>
+    <string name="style_barber_hint_no_tags">யார் உங்களுக்கு மிகவும் பொருந்துகிறார் என்று காண மேலே சில ஸ்டைல்களைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="match_percent">%1$d%% பொருத்தம்</string>
+    <string name="style_save">என் ஸ்டைலைச் சேமி</string>
+    <string name="style_saved">சேமிக்கப்பட்டது. உங்கள் ஸ்டைல் புதுப்பிக்கப்பட்டுள்ளது.</string>
+    <string name="style_moodboard_title">மூட்போர்டு</string>
+    <string name="style_moodboard_body">உத்வேகமும் உங்கள் முந்தைய முடிவெட்டுகளும், %1$d புகைப்படங்கள் வரை. அவை உங்களுக்கு மட்டுமே தெரியும்; சலூனில் உங்கள் தொலைபேசியிலிருந்து காட்டுங்கள்.</string>
+    <string name="style_moodboard_empty">இன்னும் புகைப்படங்கள் இல்லை. நீங்கள் விரும்பும் தோற்றம் அல்லது மீண்டும் வேண்டிய முடிவெட்டைச் சேருங்கள்.</string>
+    <string name="style_add_inspiration">உத்வேகம்</string>
+    <string name="style_add_result">என் முந்தைய முடிவெட்டு</string>
+    <string name="style_label_inspiration">உத்வேகம்</string>
+    <string name="style_label_result">முந்தைய முடிவெட்டு</string>
+    <string name="style_photo_adding">உங்கள் புகைப்படம் சேர்க்கப்படுகிறது…</string>
+    <string name="style_photo_added">புகைப்படம் மூட்போர்டில் சேர்க்கப்பட்டது.</string>
+    <string name="cd_delete_photo">இந்தப் புகைப்படத்தை நீக்கு</string>
+    <string name="style_consent_title">புகைப்படங்களை உங்கள் கணக்கில் வைக்கவா?</string>
+    <string name="style_consent_text">உங்கள் புகைப்படங்கள் சிறிதாக்கப்பட்டு உங்கள் SalonLink கணக்கில் சேமிக்கப்படும். அவை உங்களுக்கு மட்டுமே தெரியும், எந்தப் புகைப்படத்தையும் எப்போது வேண்டுமானாலும் நீக்கலாம்.</string>
+    <string name="style_consent_agree">ஒப்புக்கொள்கிறேன்</string>
+    <string name="language_title">மொழி</string>
+    <string name="language_system">தொலைபேசியின் மொழி</string>
+    <string name="discovery_tag_best_match">உங்களுக்கு %1$d%% பொருத்தம்</string>
+</resources>

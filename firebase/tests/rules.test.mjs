@@ -17,6 +17,7 @@ import {
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import {
+  Bytes,
   collection,
   collectionGroup,
   deleteDoc,
@@ -708,3 +709,43 @@ describe("Waitlist and live queue", () => {
     await assertFails(setDoc(doc(kavindu(), "salons/aura/queue/kasun"), board));
   });
 });
+
+// ---------- Phase 9: style profile and moodboard (v7) ----------
+describe("Style profile and photos (v7)", () => {
+  const me = () => as("kavindu", "kavindu@example.com");
+  const other = () => as("nimal", "nimal@example.com");
+  const profile = (extra = {}) => ({
+    tags: ["FADE", "BEARD"], note: "Low fade, keep the top", preferredStaffId: "kasun",
+    shareWithBarber: true, photoConsent: true, updatedAt: serverTimestamp(), ...extra,
+  });
+  const photo = (size = 1000, extra = {}) => ({
+    jpeg: Bytes.fromUint8Array(new Uint8Array(size)), label: "INSPIRATION", createdAt: serverTimestamp(), ...extra,
+  });
+
+  test("a customer saves and reads their own style profile; nobody else can", async () => {
+    await assertSucceeds(setDoc(doc(me(), "users/kavindu/style/profile"), profile()));
+    await assertSucceeds(getDoc(doc(me(), "users/kavindu/style/profile")));
+    await assertFails(getDoc(doc(other(), "users/kavindu/style/profile")));
+    await assertFails(setDoc(doc(other(), "users/kavindu/style/profile"), profile()));
+  });
+
+  test("the profile shape is checked (note length, extra fields, doc id)", async () => {
+    await assertFails(setDoc(doc(me(), "users/kavindu/style/profile"), profile({ note: "x".repeat(151) })));
+    await assertFails(setDoc(doc(me(), "users/kavindu/style/profile"), profile({ role: "OWNER" })));
+    await assertFails(setDoc(doc(me(), "users/kavindu/style/other"), profile()));
+  });
+
+  test("photos need consent, stay private and are size-limited", async () => {
+    await seed("users/kavindu/style/profile", { ...profile(), photoConsent: false, updatedAt: new Date() });
+    await assertFails(setDoc(doc(me(), "users/kavindu/photos/p1"), photo()));
+
+    await seed("users/kavindu/style/profile", { ...profile(), updatedAt: new Date() });
+    await assertSucceeds(setDoc(doc(me(), "users/kavindu/photos/p1"), photo()));
+    await assertFails(setDoc(doc(me(), "users/kavindu/photos/p2"), photo(300001)));
+    await assertFails(setDoc(doc(me(), "users/kavindu/photos/p3"), photo(1000, { label: "SELFIE" })));
+    await assertFails(getDoc(doc(other(), "users/kavindu/photos/p1")));
+    await assertFails(deleteDoc(doc(other(), "users/kavindu/photos/p1")));
+    await assertSucceeds(deleteDoc(doc(me(), "users/kavindu/photos/p1")));
+  });
+});
+

@@ -16,6 +16,9 @@ import com.group12.salonlink.domain.model.UserProfile
 import com.group12.salonlink.domain.repository.AuthRepository
 import com.group12.salonlink.domain.repository.BookingRepository
 import com.group12.salonlink.domain.repository.SalonRepository
+import com.group12.salonlink.domain.repository.StyleRepository
+import com.group12.salonlink.domain.model.StyleProfile
+import com.group12.salonlink.domain.style.BarberMatcher
 import com.group12.salonlink.feature.customer.booking.toDataError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
@@ -50,6 +53,8 @@ data class BarberCard(
     val fromPrice: Long?,
     val categories: Set<ServiceCategory>,
     val serviceNames: List<String>,
+    /** 0–100 fit with the customer's style profile (Phase 9); null without style tags. */
+    val match: Int? = null,
 )
 
 /** How to label the upcoming appointment: "Today", "Tomorrow" or its date. */
@@ -99,6 +104,7 @@ class DiscoveryViewModel @Inject constructor(
     private val salonRepository: SalonRepository,
     bookingRepository: BookingRepository,
     authRepository: AuthRepository,
+    styleRepository: StyleRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -129,9 +135,15 @@ class DiscoveryViewModel @Inject constructor(
         .catch { emit(BookingsResult(emptyList(), it.toDataError())) }
         .onStart { emit(BookingsResult(emptyList(), null)) }
 
+    /** The style profile ranks barbers by match. Without one (or if it fails) the order is by rating. */
+    private val style: Flow<StyleProfile> = user
+        .flatMapLatest { styleRepository.observeProfile(it.uid) }
+        .catch { emit(StyleProfile()) }
+        .onStart { emit(StyleProfile()) }
+
     val uiState: StateFlow<DiscoveryUiState> =
-        combine(user, catalogue, bookings, filters) { user, catalogue, bookings, filters ->
-            buildState(user, catalogue, bookings, filters)
+        combine(user, catalogue, bookings, filters, style) { user, catalogue, bookings, filters, style ->
+            buildState(user, catalogue, bookings, filters, style)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DiscoveryUiState())
 
     fun onEvent(event: DiscoveryEvent) {
@@ -163,10 +175,19 @@ class DiscoveryViewModel @Inject constructor(
         catalogue: CatalogueResult,
         bookings: BookingsResult,
         filters: Filters,
+        style: StyleProfile,
     ): DiscoveryUiState {
         val now = clock.instant()
         val today = SalonTime.localDateOf(now)
-        val all = catalogue.cards.orEmpty().sortedWith(BEST_RATED_FIRST)
+        // WHY this order: the customer's favourite first, then best match for their styles,
+        // then best rated. Without a profile this is simply "best rated first" (Phase 4).
+        val all = catalogue.cards.orEmpty()
+            .map { it.copy(match = BarberMatcher.score(style, it.staff)) }
+            .sortedWith(
+                compareByDescending<BarberCard> { it.staff.id == style.preferredStaffId }
+                    .thenByDescending { it.match ?: -1 }
+                    .then(BEST_RATED_FIRST),
+            )
         val upcoming = bookings.bookings.filter { it.isUpcoming(now) }.minByOrNull { it.start }
         val upcomingDate = upcoming?.let { SalonTime.localDateOf(it.start) }
         return DiscoveryUiState(
