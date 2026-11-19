@@ -22,6 +22,11 @@ app/google-services.json
 # Admin SDK key used only by the seed script.
 firebase/seed/service-account*.json
 
+# Release signing key and its passwords.
+keystore.properties
+*.jks
+*.keystore
+
 # --- Firebase CLI / emulator ---
 .firebase/
 firebase-debug.log

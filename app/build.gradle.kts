@@ -1,3 +1,5 @@
+import java.util.Properties
+
 // =====================================================================================
 // SalonLink — app module build file
 // -------------------------------------------------------------------------------------
@@ -28,6 +30,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing: read from keystore.properties in the project root (git-ignored).
+    // Without that file the release APK is built unsigned, so the build never needs secrets.
+    val keystoreFile = rootProject.file("keystore.properties")
+    val releaseSigning = if (keystoreFile.exists()) {
+        val props = Properties()
+        keystoreFile.inputStream().use { props.load(it) }
+        signingConfigs.create("release") {
+            storeFile = rootProject.file(props.getProperty("storeFile"))
+            storePassword = props.getProperty("storePassword")
+            keyAlias = props.getProperty("keyAlias")
+            keyPassword = props.getProperty("keyPassword")
+        }
+    } else {
+        null
+    }
+
     buildTypes {
         debug {
             // Developer switch: build with `-Psalonlink.useEmulators=true` to talk to the LOCAL
@@ -38,6 +56,7 @@ android {
         }
         release {
             buildConfigField("boolean", "USE_FIREBASE_EMULATORS", "false")
+            signingConfig = releaseSigning
             // Shrink + obfuscate the release APK (smaller download, harder to reverse-engineer).
             isMinifyEnabled = true
             isShrinkResources = true
