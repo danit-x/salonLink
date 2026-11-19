@@ -83,7 +83,31 @@ data class DiscoveryActions(
     val onBookAgain: (Booking) -> Unit = {},
     val onOpenBooking: (Booking) -> Unit = {},
     val onOpenConcierge: () -> Unit = {},
+    val onOpenNotifications: () -> Unit = {},
 )
+
+/** Bell with a coral dot while there are unread notifications. */
+@Composable
+private fun NotificationBell(unreadCount: Int, onClick: () -> Unit) {
+    val description = if (unreadCount > 0) stringResource(R.string.cd_notifications_unread, unreadCount)
+    else stringResource(R.string.cd_notifications)
+    Box {
+        com.group12.salonlink.core.designsystem.component.GlassIconButton(
+            icon = R.drawable.ic_bell,
+            contentDescription = description,
+            onClick = onClick,
+        )
+        if (unreadCount > 0) {
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 6.dp, end = 6.dp)
+                    .size(9.dp)
+                    .background(SalonTheme.colors.coral, CircleShape),
+            )
+        }
+    }
+}
 
 /** The category bubbles, in Figma order. null = "All styles". */
 private data class CategoryItem(val category: ServiceCategory?, @StringRes val label: Int, @DrawableRes val icon: Int)
@@ -104,9 +128,14 @@ fun DiscoveryScreen(
     state: DiscoveryUiState,
     onEvent: (DiscoveryEvent) -> Unit,
     actions: DiscoveryActions,
+    unreadCount: Int = 0,
 ) {
     Column(Modifier.fillMaxSize()) {
-        SalonTopBar(title = stringResource(R.string.app_name), leading = { BrandMark() })
+        SalonTopBar(
+            title = stringResource(R.string.app_name),
+            leading = { BrandMark() },
+            actions = { NotificationBell(unreadCount, actions.onOpenNotifications) },
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()

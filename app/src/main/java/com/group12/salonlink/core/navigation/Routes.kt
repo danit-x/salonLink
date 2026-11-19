@@ -30,6 +30,9 @@ import kotlinx.serialization.Serializable
 
 // ---- 2a-i. Customer booking journey (full-screen, no bottom bar, as in Figma) --------
 
+/** The notification feed behind the bell on Explore. */
+@Serializable data object NotificationsRoute
+
 /** Figma "Barber profile". */
 @Serializable data class BarberProfileRoute(val salonId: String, val staffId: String)
 

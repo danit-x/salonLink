@@ -29,6 +29,21 @@ object FirestoreSchema {
     const val BLOCKS = "blocks"       // sub-collection of salons/{id}/staff/{id}
     const val BOOKINGS = "bookings"   // sub-collection of salons/{id}; also queried as a collection group
     const val SLOT_LOCKS = "slotLocks" // sub-collection of salons/{id}
+    const val NOTIFICATIONS = "notifications" // sub-collection of users/{uid}
+    const val WAITLIST = "waitlist"   // sub-collection of salons/{id} (Phase 7)
+
+    // --- users/{uid}/notifications/{id} fields ---
+    object NotificationFields {
+        const val TYPE = "type"
+        const val SALON_ID = "salonId"
+        const val BOOKING_ID = "bookingId"
+        const val TITLE = "title"
+        const val STAFF_NAME = "staffName"
+        const val START = "start"
+        const val STATUS = "status"
+        const val READ = "read"
+        const val CREATED_AT = "createdAt"
+    }
 
     /** Lock document id, e.g. "kasun_2982528". MUST match lockPath() in firestore.rules. */
     fun slotLockId(staffId: String, slot: Long): String = "${staffId}_$slot"

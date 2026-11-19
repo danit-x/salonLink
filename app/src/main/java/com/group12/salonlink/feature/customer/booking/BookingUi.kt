@@ -67,6 +67,7 @@ fun DataError.messageRes(): Int = when (this) {
     DataError.SLOT_TAKEN -> R.string.data_error_slot_taken
     DataError.SLOT_UNAVAILABLE -> R.string.data_error_invalid
     DataError.NOT_ALLOWED -> R.string.data_error_not_allowed
+    DataError.TOO_LATE_TO_CANCEL -> R.string.data_error_too_late_to_cancel
     DataError.INVALID_REQUEST -> R.string.data_error_invalid
     DataError.UNKNOWN -> R.string.data_error_unknown
 }
@@ -133,3 +134,11 @@ fun BarberSummaryRow(staff: Staff, detail: String, modifier: Modifier = Modifier
         }
     }
 }
+
+/**
+ * The message for [this] error, ready to show. Use this rather than [messageRes] when the text
+ * may contain a number (e.g. "less than 24 hours").
+ */
+@Composable
+fun DataError.message(): String =
+    stringResource(messageRes(), com.group12.salonlink.domain.booking.BookingPolicy.FREE_CANCELLATION_HOURS.toInt())

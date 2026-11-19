@@ -96,6 +96,42 @@ service cloud.firestore {
 
       // Account deletion is not offered in v1.
       allow delete: if false;
+
+      // ---------- users/{uid}/notifications: the in-app feed (Phase 5) ----------
+      // No push server on Spark, so whoever causes an event writes a small document here and
+      // the user's app listens to it. Documents use fixed ids (type_bookingId), and an existing
+      // one can't be overwritten, so a retry never duplicates an entry.
+      match /notifications/{notificationId} {
+        allow read, delete: if isUser(uid);
+
+        // The only change allowed: marking as read.
+        allow update: if isUser(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && request.resource.data.read == true;
+
+        // Written by the user themselves (their own booking / cancel / waitlist offer), or by
+        // staff of the salon about a booking that really belongs to this user.
+        allow create: if validNotification(request.resource.data)
+          && (
+            (isUser(uid) && request.resource.data.type in ['BOOKING_CONFIRMED', 'BOOKING_CANCELLED', 'WAITLIST_OFFER'])
+            || (isMemberOf(request.resource.data.salonId)
+                && request.resource.data.type in ['BOOKING_CANCELLED', 'STATUS_CHANGED']
+                && get(/databases/$(database)/documents/salons/$(request.resource.data.salonId)/bookings/$(request.resource.data.bookingId)).data.customerId == uid)
+          );
+      }
+    }
+
+    function validNotification(n) {
+      return n.keys().hasOnly(['type', 'salonId', 'bookingId', 'title', 'staffName', 'start', 'status', 'read', 'createdAt'])
+        && n.type in ['BOOKING_CONFIRMED', 'BOOKING_CANCELLED', 'STATUS_CHANGED', 'WAITLIST_OFFER']
+        && n.salonId is string && n.salonId.size() > 0 && n.salonId.size() <= 100
+        && n.bookingId is string && n.bookingId.size() > 0 && n.bookingId.size() <= 100
+        && n.title is string && n.title.size() <= 200
+        && n.staffName is string && n.staffName.size() <= 100
+        && n.start is timestamp
+        && (n.status == null || n.status is string)
+        && n.read == false
+        && n.createdAt == request.time;
     }
 
     // ---------- invites/{email}: grants STAFF/OWNER at registration ----------
@@ -228,7 +264,8 @@ service cloud.firestore {
         allow create: if validNewBooking(bookingId, request.resource.data)
           && mayCreateBooking(request.resource.data);
 
-        // Customers may only cancel their own booking, and only before check-in.
+        // Customers may only cancel their own booking, before check-in and at least 24 h before
+        // the start (BookingPolicy.FREE_CANCELLATION_HOURS). Later, they call the salon.
         // Staff/owners may move it along the status table (check-in, start, complete, no-show…).
         allow update: if request.resource.data.updatedAt == request.time
           && request.resource.data.status in nextStatuses()[resource.data.status]
@@ -236,6 +273,7 @@ service cloud.firestore {
             (signedIn() && resource.data.customerId == request.auth.uid
                && resource.data.status == 'BOOKED'
                && request.resource.data.status == 'CANCELLED'
+               && resource.data.start > request.time + duration.value(24, 'h')
                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
             || (isMemberOf(salonId)
                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'checkedInAt']))

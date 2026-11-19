@@ -17,6 +17,7 @@ import com.group12.salonlink.domain.usecase.CreateBookingUseCase
 import com.group12.salonlink.domain.usecase.ObserveAvailabilityUseCase
 import com.group12.salonlink.testing.FakeAuthRepository
 import com.group12.salonlink.testing.FakeBookingRepository
+import com.group12.salonlink.testing.FakeNotificationRepository
 import com.group12.salonlink.testing.FakeSalonRepository
 import com.group12.salonlink.testing.MainDispatcherRule
 import java.time.Clock
@@ -66,6 +67,7 @@ class BookingFlowViewModelTest {
         )
     }
     private val bookings = FakeBookingRepository()
+    private val notifications = FakeNotificationRepository()
     private val auth = FakeAuthRepository().apply {
         signInAs(UserProfile("kavindu", "Kavindu Perera", "kavindu@example.com", null, Role.CUSTOMER))
     }
@@ -76,7 +78,7 @@ class BookingFlowViewModelTest {
         salonRepository = salons,
         authRepository = auth,
         observeAvailability = availability,
-        createBooking = CreateBookingUseCase(salons, bookings, availability, clock),
+        createBooking = CreateBookingUseCase(salons, bookings, availability, notifications, clock),
         clock = clock,
     )
 
@@ -206,7 +208,7 @@ class BookingFlowViewModelTest {
             salonRepository = salons,
             authRepository = auth,
             observeAvailability = availability,
-            createBooking = CreateBookingUseCase(salons, bookings, availability, clock),
+            createBooking = CreateBookingUseCase(salons, bookings, availability, notifications, clock),
             clock = clock,
         ).also { collect(it) }
         assertEquals(DataError.NOT_FOUND, vm.uiState.value.loadError)

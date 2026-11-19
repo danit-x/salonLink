@@ -86,6 +86,11 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    // --- Reminders (WorkManager + Hilt workers) ---
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
     // --- Unit tests (run on the JVM, no device needed) ---
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

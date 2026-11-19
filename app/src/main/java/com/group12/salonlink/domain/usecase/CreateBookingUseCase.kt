@@ -11,7 +11,10 @@ import com.group12.salonlink.domain.model.BookingType
 import com.group12.salonlink.domain.model.DataError
 import com.group12.salonlink.domain.model.DataException
 import com.group12.salonlink.domain.model.SlotUnavailableException
+import com.group12.salonlink.domain.model.AppNotification
+import com.group12.salonlink.domain.model.NotificationType
 import com.group12.salonlink.domain.repository.BookingRepository
+import com.group12.salonlink.domain.repository.NotificationRepository
 import com.group12.salonlink.domain.repository.SalonRepository
 import java.time.Clock
 import java.time.Instant
@@ -56,6 +59,7 @@ class CreateBookingUseCase @Inject constructor(
     private val salonRepository: SalonRepository,
     private val bookingRepository: BookingRepository,
     private val observeAvailability: ObserveAvailabilityUseCase,
+    private val notificationRepository: NotificationRepository,
     private val clock: Clock,
 ) {
 
@@ -106,7 +110,7 @@ class CreateBookingUseCase @Inject constructor(
             type = request.type,
             note = request.note?.trim()?.take(MAX_NOTE_LENGTH)?.ifEmpty { null },
         )
-        return try {
+        val saved = try {
             bookingRepository.createBooking(booking)
         } catch (e: DataException) {
             // Report a lost race the same way as any other unavailable time, so the UI has one case.
@@ -115,6 +119,13 @@ class CreateBookingUseCase @Inject constructor(
             }
             throw e
         }
+        // "Booking confirmed" in the customer's own feed. Walk-ins are added by staff and have
+        // no app account (or the staff member is not that customer), so they are skipped.
+        val customer = saved.customerId
+        if (saved.type == BookingType.APPOINTMENT && customer != null) {
+            notificationRepository.addBestEffort(customer, AppNotification.about(saved, NotificationType.BOOKING_CONFIRMED))
+        }
+        return saved
     }
 
     companion object {

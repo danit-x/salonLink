@@ -67,7 +67,9 @@ import com.group12.salonlink.domain.model.DataError
 import com.group12.salonlink.domain.model.Salon
 import com.group12.salonlink.feature.customer.booking.BookingFlowPreviewData
 import com.group12.salonlink.feature.customer.booking.labelRes
+import com.group12.salonlink.feature.customer.booking.message
 import com.group12.salonlink.feature.customer.booking.messageRes
+import com.group12.salonlink.feature.customer.bookings.CancelBookingDialog
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -76,13 +78,14 @@ import java.util.Locale
 /**
  * The ticket after booking (or when opening a booking later).
  *
- * @param onViewBookings opens the Bookings tab (the full list arrives in Phase 5).
+ * @param onViewBookings opens the Bookings tab.
  */
 @Composable
 fun BookingConfirmationScreen(
     state: BookingConfirmationUiState,
     onBack: () -> Unit,
     onViewBookings: () -> Unit,
+    onEvent: (BookingConfirmationEvent) -> Unit = {},
 ) {
     val context = LocalContext.current
     val booking = state.booking
@@ -164,8 +167,29 @@ fun BookingConfirmationScreen(
                         .height(56.dp),
                 )
                 PolicyNote(booking)
+                state.cancelError?.let { FormBanner(it.message(), BannerTone.ERROR) }
+                when {
+                    state.canCancel -> androidx.compose.material3.TextButton(onClick = { onEvent(BookingConfirmationEvent.RequestCancel) }) {
+                        Text(stringResource(R.string.action_cancel_booking), color = MaterialTheme.colorScheme.error)
+                    }
+                    state.lateToCancel -> Text(
+                        text = stringResource(R.string.cancel_late_note, BookingPolicy.FREE_CANCELLATION_HOURS.toInt()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
+    }
+
+    if (state.showCancelDialog && booking != null) {
+        CancelBookingDialog(
+            booking = booking,
+            cancelling = state.cancelling,
+            onConfirm = { onEvent(BookingConfirmationEvent.ConfirmCancel) },
+            onDismiss = { onEvent(BookingConfirmationEvent.DismissCancel) },
+        )
     }
 }
 

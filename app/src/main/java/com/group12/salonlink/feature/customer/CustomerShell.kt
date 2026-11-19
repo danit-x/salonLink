@@ -1,6 +1,18 @@
 // Covers: customer navigation · Figma: bottom navigation (Explore / Bookings / Concierge / My style)
 package com.group12.salonlink.feature.customer
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import com.group12.salonlink.core.navigation.NotificationsRoute
+import com.group12.salonlink.feature.customer.bookings.MyBookingsScreen
+import com.group12.salonlink.feature.customer.bookings.MyBookingsViewModel
+import com.group12.salonlink.feature.customer.notifications.NotificationsScreen
+import com.group12.salonlink.feature.customer.notifications.NotificationsViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,16 +75,41 @@ private val customerTabs = listOf(
  * @param user the signed-in customer (always role CUSTOMER here, guaranteed by SalonLinkRoot).
  */
 @Composable
-fun CustomerShell(user: UserProfile, onSignOut: () -> Unit) {
+fun CustomerShell(
+    user: UserProfile,
+    onSignOut: () -> Unit,
+    session: CustomerSessionViewModel = hiltViewModel(),
+) {
     val navController = rememberNavController()
+    val unreadCount by session.unreadCount.collectAsStateWithLifecycle()
+    RequestNotificationPermission()
+    val signOut = {
+        session.onSignOut()
+        onSignOut()
+    }
     RoleShell(tabs = customerTabs, navController = navController) {
-        composable<ExploreRoute> { DiscoveryRoute(navController) }
+        composable<ExploreRoute> { DiscoveryRoute(navController, unreadCount) }
         composable<BookingsRoute> {
-            PlaceholderScreen(
-                title = stringResource(R.string.bookings_placeholder_title),
-                message = stringResource(R.string.bookings_placeholder_message),
-                badge = stringResource(R.string.badge_phase, 5),
-                icon = R.drawable.ic_calendar_days,
+            val viewModel: MyBookingsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            MyBookingsScreen(
+                state = state,
+                onEvent = viewModel::onEvent,
+                onOpenBooking = { navController.navigate(BookingConfirmationRoute(it.salonId, it.id)) },
+                onBookNow = { navController.navigateToTab(ExploreRoute) },
+            )
+        }
+        composable<NotificationsRoute> {
+            val viewModel: NotificationsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            NotificationsScreen(
+                state = state,
+                onBack = { navController.popBackStack() },
+                onOpen = {
+                    viewModel.markRead(it)
+                    navController.navigate(BookingConfirmationRoute(it.salonId, it.bookingId))
+                },
+                onMarkAllRead = viewModel::markAllRead,
             )
         }
         composable<ConciergeRoute> {
@@ -89,18 +126,36 @@ fun CustomerShell(user: UserProfile, onSignOut: () -> Unit) {
             AccountSummary(
                 user = user,
                 nextUpNote = stringResource(R.string.style_placeholder_message),
-                onSignOut = onSignOut,
+                onSignOut = signOut,
             )
         }
         bookingJourney(navController)
     }
 }
 
+/**
+ * Android 13+ needs the user's OK before an app may show notifications. We ask once, on the
+ * customer home, because reminders are only useful to customers. Saying no is fine: the in-app
+ * feed still works, only the phone notifications are skipped.
+ */
 @Composable
-private fun DiscoveryRoute(navController: NavHostController, viewModel: DiscoveryViewModel = hiltViewModel()) {
+private fun RequestNotificationPermission() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(Unit) {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!granted) launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+}
+
+@Composable
+private fun DiscoveryRoute(navController: NavHostController, unreadCount: Int, viewModel: DiscoveryViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     DiscoveryScreen(
         state = state,
+        unreadCount = unreadCount,
         onEvent = viewModel::onEvent,
         actions = DiscoveryActions(
             onBarberClick = { navController.navigate(BarberProfileRoute(it.salon.id, it.staff.id)) },
@@ -110,6 +165,7 @@ private fun DiscoveryRoute(navController: NavHostController, viewModel: Discover
             },
             onOpenBooking = { navController.navigate(BookingConfirmationRoute(it.salonId, it.id)) },
             onOpenConcierge = { navController.navigateToTab(ConciergeRoute) },
+            onOpenNotifications = { navController.navigate(NotificationsRoute) },
         ),
     )
 }
@@ -172,6 +228,7 @@ private fun NavGraphBuilder.bookingJourney(navController: NavHostController) {
             state = state,
             onBack = { navController.popBackStack() },
             onViewBookings = { navController.navigateToTab(BookingsRoute) },
+            onEvent = viewModel::onEvent,
         )
     }
 }

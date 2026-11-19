@@ -33,4 +33,14 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBookingRepository(impl: FirestoreBookingRepository): BookingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(impl: com.group12.salonlink.data.repository.FirestoreNotificationRepository):
+        com.group12.salonlink.domain.repository.NotificationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReminderScheduler(impl: com.group12.salonlink.data.reminder.WorkManagerReminderScheduler):
+        com.group12.salonlink.domain.repository.ReminderScheduler
 }

@@ -84,8 +84,6 @@
     <string name="tab_concierge">Concierge</string>
     <string name="tab_my_style">My style</string>
 
-    <string name="bookings_placeholder_title">Your bookings</string>
-    <string name="bookings_placeholder_message">Upcoming visits, booking history and free cancellation.</string>
     <string name="concierge_on_hold_title">Your salon concierge is on its way</string>
     <string name="concierge_on_hold_message">Booking by chat (\"a haircut tomorrow after 5\") will arrive in a later release. Until then, booking from Explore takes three taps.</string>
     <string name="style_placeholder_title">My style profile</string>
@@ -230,6 +228,48 @@
     <string name="status_completed">Completed</string>
     <string name="status_cancelled">Cancelled</string>
     <string name="status_missed">Missed</string>
+
+    <!-- ===================== Phase 5: my bookings, notifications, reminders ===================== -->
+    <string name="data_error_too_late_to_cancel">It\'s less than %1$d hours to your appointment, so it can\'t be cancelled in the app. Please call the salon.</string>
+
+    <!-- My bookings -->
+    <string name="bookings_title">Your bookings</string>
+    <string name="bookings_tab_upcoming">Upcoming</string>
+    <string name="bookings_tab_history">History</string>
+    <string name="bookings_empty_upcoming">No upcoming visits. Your next great cut is a few taps away.</string>
+    <string name="bookings_empty_history">Past and cancelled bookings will show up here.</string>
+    <string name="bookings_book_now">Book a visit</string>
+    <string name="bookings_with">with %1$s · %2$s</string>
+    <string name="bookings_cancelled_message">Booking cancelled. The time is free for someone else now.</string>
+    <string name="action_cancel_booking">Cancel booking</string>
+    <string name="action_keep_booking">Keep it</string>
+    <string name="cancel_dialog_title">Cancel this booking?</string>
+    <string name="cancel_dialog_text">%1$s with %2$s on %3$s. This can\'t be undone, but you can book again any time.</string>
+    <string name="cancel_late_note">Less than %1$d hours to go: please call the salon to cancel.</string>
+    <string name="call_salon">Call %1$s</string>
+
+    <!-- Notification feed -->
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_mark_all_read">Mark all read</string>
+    <string name="notifications_empty">Nothing new. Booking updates and reminders will appear here.</string>
+    <string name="cd_notifications">Notifications</string>
+    <string name="cd_notifications_unread">Notifications, %1$d unread</string>
+    <string name="notification_booking_confirmed">Booking confirmed</string>
+    <string name="notification_booking_cancelled">Booking cancelled</string>
+    <string name="notification_checked_in">You\'re checked in</string>
+    <string name="notification_in_service">You\'re in the chair</string>
+    <string name="notification_completed">All done. Thanks for visiting!</string>
+    <string name="notification_missed">Marked as missed</string>
+    <string name="notification_status_other">Your booking was updated</string>
+    <string name="notification_waitlist_offer">An earlier time is free</string>
+    <string name="notification_body">%1$s with %2$s · %3$s, %4$s</string>
+
+    <!-- Phone notifications (reminders) -->
+    <string name="channel_reminders">Appointment reminders</string>
+    <string name="channel_updates">Salon updates</string>
+    <string name="reminder_title_tomorrow">Your appointment is tomorrow</string>
+    <string name="reminder_title_soon">Your appointment is soon</string>
+    <string name="reminder_text">%1$s with %2$s · %3$s, %4$s</string>
 
     <!-- Staff tabs -->
     <string name="tab_today">Today</string>

@@ -15,6 +15,7 @@ import com.group12.salonlink.domain.model.StaffBlock
 import com.group12.salonlink.domain.model.TimeRange
 import com.group12.salonlink.domain.model.WeeklyHours
 import com.group12.salonlink.testing.FakeBookingRepository
+import com.group12.salonlink.testing.FakeNotificationRepository
 import com.group12.salonlink.testing.FakeSalonRepository
 import java.time.Clock
 import java.time.DayOfWeek
@@ -55,8 +56,9 @@ class CreateBookingUseCaseTest {
         )
     }
     private val bookings = FakeBookingRepository()
+    private val notifications = FakeNotificationRepository()
     private val availability = ObserveAvailabilityUseCase(salons, bookings, clock)
-    private val createBooking = CreateBookingUseCase(salons, bookings, availability, clock)
+    private val createBooking = CreateBookingUseCase(salons, bookings, availability, notifications, clock)
 
     private fun request(
         id: String = "b1",
@@ -167,9 +169,44 @@ class CreateBookingUseCaseTest {
     @Test
     fun `cancelling frees the slot for someone else`() = runTest {
         createBooking(request())
-        CancelBookingUseCase(bookings)("aura", "b1")
+        // Same day (less than 24 h ahead), so only the salon may cancel it.
+        CancelBookingUseCase(bookings, notifications, clock)("aura", "b1", byStaff = true)
         assertEquals(BookingStatus.CANCELLED, bookings.bookings.value.getValue("b1").status)
         assertTrue(at(17, 30) in availability("aura", "kasun", thursday, 30).first())
         createBooking(request(id = "b2")) // the same time again: now fine
+    }
+
+    @Test
+    fun `a customer cannot cancel less than 24 h before, the salon can`() = runTest {
+        createBooking(request())
+        expectError(DataError.TOO_LATE_TO_CANCEL) { CancelBookingUseCase(bookings, notifications, clock)("aura", "b1") }
+        assertEquals(BookingStatus.BOOKED, bookings.bookings.value.getValue("b1").status)
+    }
+
+    @Test
+    fun `a customer cancels a booking two days ahead and gets a feed entry`() = runTest {
+        val later = SalonTime.toInstant(thursday.plusDays(2), LocalTime.of(11, 0))
+        createBooking(request(start = later))
+        CancelBookingUseCase(bookings, notifications, clock)("aura", "b1")
+        assertEquals(BookingStatus.CANCELLED, bookings.bookings.value.getValue("b1").status)
+        assertEquals(
+            listOf("booking_confirmed_b1", "booking_cancelled_b1"),
+            notifications.added.filter { it.first == "kavindu" }.map { it.second.id },
+        )
+    }
+
+    @Test
+    fun `booking writes a confirmed entry to the customer's feed, but walk-ins don't`() = runTest {
+        createBooking(request())
+        createBooking(request(id = "w1", start = at(15), type = BookingType.WALK_IN))
+        assertEquals(listOf("booking_confirmed_b1"), notifications.added.map { it.second.id })
+    }
+
+    @Test
+    fun `a failing feed write does not undo the booking`() = runTest {
+        notifications.failNext = true
+        val saved = createBooking(request())
+        assertEquals("b1", saved.id)
+        assertTrue(notifications.added.isEmpty())
     }
 }

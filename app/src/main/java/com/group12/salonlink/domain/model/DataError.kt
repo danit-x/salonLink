@@ -14,6 +14,7 @@ enum class DataError {
     SLOT_TAKEN,         // someone else booked this time a moment ago (lost the race, T03)
     SLOT_UNAVAILABLE,   // the time isn't bookable: closed, blocked, past… see SlotUnavailableException
     NOT_ALLOWED,        // e.g. cancelling a booking that is already completed
+    TOO_LATE_TO_CANCEL, // less than 24 h before the start: the customer must call the salon
     INVALID_REQUEST,    // e.g. a service this barber doesn't offer, or no services chosen
     UNKNOWN,
 }

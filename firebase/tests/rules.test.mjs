@@ -299,8 +299,9 @@ describe("Reading bookings (T09)", () => {
 
 describe("Booking engine (slot locks)", () => {
   const SLOT_MS = 10 * 60 * 1000;
-  // 3 Dec 2026, 17:30 Colombo = 12:00 UTC. Far enough in the future for "start > now".
-  const START = new Date("2026-12-03T12:00:00Z");
+  // 14 days from now, on the 10-minute grid. WHY not a fixed date: the rules refuse bookings in
+  // the past and late cancellations (< 24 h), so a hard-coded date would break these tests later.
+  const START = new Date(Math.ceil((Date.now() + 14 * 86_400_000) / SLOT_MS) * SLOT_MS);
   const START_SLOT = START.getTime() / SLOT_MS;
 
   /** A valid booking document for `slots` 10-minute slots starting at START + offset. */
@@ -491,6 +492,79 @@ describe("Booking engine (slot locks)", () => {
   test("bookings can never be deleted", async () => {
     await book(kavindu(), "b1", bookingDoc());
     await assertFails(deleteDoc(doc(kasunStaff(), "salons/aura/bookings/b1")));
+  });
+
+  test("a customer cannot cancel in the app less than 24 h before; staff still can", async () => {
+    // Seeded directly: starts in 2 hours (creating it through the rules is fine too, this is quicker).
+    const soonSlot = Math.ceil((Date.now() + 2 * 3600_000) / SLOT_MS);
+    const soon = { ...bookingDoc(), start: new Date(soonSlot * SLOT_MS), end: new Date((soonSlot + 5) * SLOT_MS), startSlot: soonSlot, endSlot: soonSlot + 5, createdAt: new Date(), updatedAt: new Date() };
+    await seed("salons/aura/bookings/late", soon);
+    const ref = (db) => doc(db, "salons/aura/bookings/late");
+    await assertFails(updateDoc(ref(kavindu()), { status: "CANCELLED", updatedAt: serverTimestamp() }));
+    await assertSucceeds(updateDoc(ref(kasunStaff()), { status: "CANCELLED", updatedAt: serverTimestamp() }));
+  });
+});
+
+// ---------- users/{uid}/notifications (Phase 5) ----------
+
+describe("Notification feed", () => {
+  const note = (extra = {}) => ({
+    type: "BOOKING_CONFIRMED",
+    salonId: "aura",
+    bookingId: "b1",
+    title: "Haircut",
+    staffName: "Kasun Perera",
+    start: new Date(Date.now() + 86_400_000 * 3),
+    status: null,
+    read: false,
+    createdAt: serverTimestamp(),
+    ...extra,
+  });
+  const path = (uid, id = "booking_confirmed_b1") => `users/${uid}/notifications/${id}`;
+  const kavindu = () => as("kavindu", "kavindu@example.com");
+  const kasunStaff = () => as("kasun-uid", "kasun@aura.lk");
+
+  beforeEach(async () => {
+    await seed("users/kavindu", { ...customerProfile("kavindu@example.com"), createdAt: new Date() });
+    await seed("users/kasun-uid", {
+      ...customerProfile("kasun@aura.lk", { role: "STAFF", salonId: "aura", staffId: "kasun" }),
+      createdAt: new Date(),
+    });
+    await seed("salons/aura/bookings/b1", { customerId: "kavindu", staffId: "kasun", status: "BOOKED" });
+  });
+
+  test("a customer writes and reads their own feed", async () => {
+    await assertSucceeds(setDoc(doc(kavindu(), path("kavindu")), note()));
+    await assertSucceeds(getDoc(doc(kavindu(), path("kavindu"))));
+  });
+
+  test("nobody else can read a customer's feed", async () => {
+    await seed(path("kavindu"), { ...note(), createdAt: new Date() });
+    await assertFails(getDoc(doc(as("nimal", "nimal@example.com"), path("kavindu"))));
+  });
+
+  test("an existing entry cannot be written again (no duplicates on retry)", async () => {
+    await assertSucceeds(setDoc(doc(kavindu(), path("kavindu")), note()));
+    await assertFails(setDoc(doc(kavindu(), path("kavindu")), note()));
+  });
+
+  test("the only allowed change is marking as read", async () => {
+    await seed(path("kavindu"), { ...note(), createdAt: new Date() });
+    await assertSucceeds(updateDoc(doc(kavindu(), path("kavindu")), { read: true }));
+    await assertFails(updateDoc(doc(kavindu(), path("kavindu")), { title: "Free haircut!" }));
+  });
+
+  test("salon staff can notify the customer of THEIR booking about a status change", async () => {
+    await assertSucceeds(setDoc(doc(kasunStaff(), path("kavindu", "status_changed_checked_in_b1")), note({ type: "STATUS_CHANGED", status: "CHECKED_IN" })));
+  });
+
+  test("staff cannot write into the feed of someone who doesn't own the booking", async () => {
+    await seed("users/nimal", { ...customerProfile("nimal@example.com"), createdAt: new Date() });
+    await assertFails(setDoc(doc(kasunStaff(), path("nimal", "status_changed_checked_in_b1")), note({ type: "STATUS_CHANGED", status: "CHECKED_IN" })));
+  });
+
+  test("a customer cannot write into another customer's feed", async () => {
+    await assertFails(setDoc(doc(kavindu(), path("nimal")), note()));
   });
 });
 
