@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -58,6 +59,8 @@ class CustomerSessionViewModel @Inject constructor(
         .flatMapLatest { notificationRepository.observeNotifications(it) }
         // A broken feed must not crash the shell; the feed screen shows the error itself.
         .catch { emit(emptyList()) }
+        // One Firestore listener shared by the badge and the announcer below.
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 
     /** Unread entries for the bell badge. */
     val unreadCount: StateFlow<Int> = notifications
@@ -92,7 +95,7 @@ class CustomerSessionViewModel @Inject constructor(
     private val announcedOffers = mutableSetOf<String>()
 
     init {
-        // 4. Waitlist offers: someone cancelled and the freed time is held for this customer.
+        // 4. Waitlist offers: someone cancelled and the freed time is offered to this customer.
         viewModelScope.launch {
             uid.flatMapLatest { id -> waitlistRepository.observeMine(id).map { id to it } }
                 .catch { /* can't read the waitlist right now; the Bookings tab shows it later */ }
@@ -126,7 +129,9 @@ class CustomerSessionViewModel @Inject constructor(
         notifier.show(key = notification.id, title = title, text = body, channel = SystemNotifier.CHANNEL_UPDATES)
     }
 
-    /** The customer's own actions (booking, cancelling) don't need a phone notification. */
-    private fun NotificationType.isFromSalon() =
-        this == NotificationType.STATUS_CHANGED || this == NotificationType.WAITLIST_OFFER
+    /**
+     * The customer's own actions (booking, cancelling) don't need a phone notification.
+     * Waitlist offers are announced by the offer watcher above, so they are left out here.
+     */
+    private fun NotificationType.isFromSalon() = this == NotificationType.STATUS_CHANGED
 }

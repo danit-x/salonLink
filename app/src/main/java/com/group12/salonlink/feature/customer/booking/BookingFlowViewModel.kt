@@ -158,7 +158,7 @@ class BookingFlowViewModel @AssistedInject constructor(
     private val observeAvailability: ObserveAvailabilityUseCase,
     private val createBooking: CreateBookingUseCase,
     private val waitlistRepository: WaitlistRepository,
-    clock: Clock,
+    private val clock: Clock,
 ) : ViewModel() {
 
     /** Hilt creates this ViewModel with the navigation arguments of the flow. */
@@ -208,12 +208,23 @@ class BookingFlowViewModel @AssistedInject constructor(
         .onStart<Catalogue> { emit(Catalogue.Loading) }
         .catch { emit(Catalogue.Failed(it.toDataError())) }
 
-    /** The day whose times are shown: the user's pick, or else the first day the barber works. */
+    /**
+     * The day whose times are shown: the user's pick, or else the first day the barber works
+     * that is not already over (late in the evening that is tomorrow, not an empty today).
+     */
     private fun effectiveDate(catalogue: Catalogue, form: Form): LocalDate? {
         if (catalogue !is Catalogue.Ready) return null
         return form.selectedDate ?: generateSequence(today) { it.plusDays(1) }
             .takeWhile { it <= lastBookableDate }
-            .firstOrNull { workingDay(catalogue.salon, catalogue.staff, it) }
+            .firstOrNull { workingDay(catalogue.salon, catalogue.staff, it) && !dayIsOver(catalogue, it) }
+    }
+
+    private fun dayIsOver(catalogue: Catalogue.Ready, date: LocalDate): Boolean {
+        if (date != today) return false
+        val window = AvailabilityCalculator.workingWindow(
+            DayAvailabilityInput(date, catalogue.salon.openingHours, catalogue.staff.workingHours, emptyList(), emptySet(), Instant.EPOCH),
+        ) ?: return true
+        return SalonTime.toInstant(date, window.end) <= clock.instant()
     }
 
     /** Re-subscribes only when the day or the total duration changes, not on every tap. */

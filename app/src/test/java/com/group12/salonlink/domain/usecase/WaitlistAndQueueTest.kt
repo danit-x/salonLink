@@ -86,6 +86,40 @@ class WaitlistAndQueueTest {
     }
 
     @Test
+    fun `a no-show offer starts on the next 10-minute boundary`() = runTest {
+        create(request("b1", "kavindu", at(17, 0)))
+        val id = join("nimal")
+        // Marked as a no-show at 17:03:27; pretend the booking ran to 18:30 so 30 min still fit.
+        now = at(17, 3).plusSeconds(27)
+        val freed = bookings.bookings.value.getValue("b1").copy(end = at(18, 30))
+
+        offerFreed(freed)
+
+        assertEquals(at(17, 10), waitlist.entries.value.getValue(id).offer?.start)
+    }
+
+    @Test
+    fun `the person who cancelled is not offered their own time back`() = runTest {
+        create(request("b1", "nimal", at(17, 30)))
+        val own = join("nimal")
+        cancel("aura", "b1")
+        assertEquals(WaitlistStatus.WAITING, waitlist.entries.value.getValue(own).status)
+    }
+
+    @Test
+    fun `if ACCEPTED is refused after booking, the entry leaves the line instead`() = runTest {
+        create(request("b1", "kavindu", at(17, 30)))
+        val id = join("nimal")
+        cancel("aura", "b1")
+        waitlist.refuseAccept = true
+
+        val booking = accept(waitlist.entries.value.getValue(id), "Nimal")
+
+        assertEquals(at(17, 30), booking.start)
+        assertEquals(WaitlistStatus.LEFT, waitlist.entries.value.getValue(id).status)
+    }
+
+    @Test
     fun `the offer respects the customer's time window`() = runTest {
         create(request("b1", "kavindu", at(17, 30)))
         val morningOnly = join("nimal", from = 9, to = 12)

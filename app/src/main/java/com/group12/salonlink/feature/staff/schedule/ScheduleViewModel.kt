@@ -26,6 +26,7 @@ import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -122,17 +124,34 @@ class ScheduleViewModel @Inject constructor(
     clock: Clock,
 ) : ViewModel() {
 
-    private val today = LocalDate.now(clock.withZone(SalonTime.SALON_ZONE))
+    private val salonClock = clock.withZone(SalonTime.SALON_ZONE)
+    private fun today(): LocalDate = LocalDate.now(salonClock)
 
+    /**
+     * The salon's current date, re-checked every minute. WHY: the staff app stays open all day
+     * (and sometimes overnight), so "today" must roll over at midnight by itself.
+     */
+    private val todayFlow: Flow<LocalDate> = flow {
+        while (true) {
+            emit(today())
+            delay(60_000)
+        }
+    }.distinctUntilChanged()
+
+    /** @property date the day picked with the arrows, or null to follow today. */
     private data class Ui(
-        val date: LocalDate,
+        val date: LocalDate? = null,
         val staffFilter: String? = null,
         val busyIds: Set<String> = emptySet(),
         val pending: PendingChange? = null,
         val message: ScheduleMessage? = null,
     )
 
-    private val ui = MutableStateFlow(Ui(date = today))
+    private val ui = MutableStateFlow(Ui())
+
+    /** The day on screen. */
+    private val shownDate: Flow<LocalDate> =
+        combine(ui.map { it.date }, todayFlow) { picked, today -> picked ?: today }.distinctUntilChanged()
 
     private val user: Flow<UserProfile> = authRepository.authState
         .filterIsInstance<AuthState.SignedIn>()
@@ -141,28 +160,29 @@ class ScheduleViewModel @Inject constructor(
 
     private sealed interface Day {
         data object Loading : Day
-        data class Ready(val bookings: List<Booking>, val staff: List<Staff>) : Day
+        data class Ready(val date: LocalDate, val bookings: List<Booking>, val staff: List<Staff>) : Day
         data class Failed(val error: DataError) : Day
     }
 
-    private val day: Flow<Day> = combine(user, ui.map { it.date }.distinctUntilChanged()) { u, d -> u to d }
+    private val day: Flow<Day> = combine(user, shownDate) { u, d -> u to d }
         .flatMapLatest { (u, date) ->
             val salonId = u.salonId ?: return@flatMapLatest flowOf(Day.Failed(DataError.PERMISSION_DENIED))
             val bookings = if (u.role == Role.OWNER) bookingRepository.observeSalonDay(salonId, date)
             else bookingRepository.observeStaffDay(salonId, u.staffId.orEmpty(), date)
-            combine(bookings, salonRepository.observeStaff(salonId)) { b, s -> Day.Ready(b.sortedBy { it.start }, s) as Day }
+            combine(bookings, salonRepository.observeStaff(salonId)) { b, s -> Day.Ready(date, b.sortedBy { it.start }, s) as Day }
                 .onStart { emit(Day.Loading) }
                 .catch { emit(Day.Failed(it.toDataError())) }
         }
 
-    val uiState: StateFlow<ScheduleUiState> = combine(user, day, ui) { u, day, ui ->
+    val uiState: StateFlow<ScheduleUiState> = combine(user, day, ui, todayFlow) { u, day, ui, today ->
         val ready = day as? Day.Ready
         val all = ready?.bookings.orEmpty()
+        val date = ui.date ?: today
         ScheduleUiState(
             loading = day is Day.Loading,
             isOwner = u.role == Role.OWNER,
-            date = ui.date,
-            isToday = ui.date == today,
+            date = date,
+            isToday = date == today,
             staff = ready?.staff.orEmpty(),
             staffFilter = ui.staffFilter,
             bookings = all.filter { ui.staffFilter == null || it.staffId == ui.staffFilter },
@@ -172,7 +192,7 @@ class ScheduleViewModel @Inject constructor(
             message = ui.message,
             error = (day as? Day.Failed)?.error,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ScheduleUiState(date = today))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ScheduleUiState(date = today()))
 
     /** What was last published per barber, to skip writes when nothing changed. */
     private val lastPublished = mutableMapOf<String, List<QueueEntry>>()
@@ -182,11 +202,11 @@ class ScheduleViewModel @Inject constructor(
         // live queue. Every change to today's bookings refreshes the anonymous boards customers
         // read (Phase 7). Only today's board matters, so other days are never published.
         viewModelScope.launch {
-            combine(user, ui.map { it.date }.distinctUntilChanged(), day) { u, date, day -> Triple(u, date, day) }
-                .collect { (u, date, day) ->
+            combine(user, day, todayFlow) { u, day, today -> Triple(u, day, today) }
+                .collect { (u, day, today) ->
                     val ready = day as? Day.Ready ?: return@collect
                     val salonId = u.salonId ?: return@collect
-                    if (date != today) return@collect
+                    if (ready.date != today) return@collect
                     val staffIds = if (u.role == Role.OWNER) ready.staff.map { it.id } else listOfNotNull(u.staffId)
                     staffIds.forEach { staffId ->
                         val entries = QueueEtaCalculator.boardEntries(ready.bookings.filter { it.staffId == staffId })
@@ -204,9 +224,9 @@ class ScheduleViewModel @Inject constructor(
 
     fun onEvent(event: ScheduleEvent) {
         when (event) {
-            ScheduleEvent.PreviousDay -> ui.update { it.copy(date = it.date.minusDays(1)) }
-            ScheduleEvent.NextDay -> ui.update { it.copy(date = it.date.plusDays(1)) }
-            ScheduleEvent.Today -> ui.update { it.copy(date = today) }
+            ScheduleEvent.PreviousDay -> pickDate((ui.value.date ?: today()).minusDays(1))
+            ScheduleEvent.NextDay -> pickDate((ui.value.date ?: today()).plusDays(1))
+            ScheduleEvent.Today -> ui.update { it.copy(date = null) }
             is ScheduleEvent.FilterStaff -> ui.update { it.copy(staffFilter = event.staffId) }
             is ScheduleEvent.ChangeStatus ->
                 if (event.next == BookingStatus.MISSED || event.next == BookingStatus.CANCELLED) {
@@ -222,6 +242,9 @@ class ScheduleViewModel @Inject constructor(
             ScheduleEvent.MessageShown -> ui.update { it.copy(message = null) }
         }
     }
+
+    /** Arrowing back onto today means "follow today" again, so it rolls over at midnight. */
+    private fun pickDate(date: LocalDate) = ui.update { it.copy(date = date.takeIf { d -> d != today() }) }
 
     private fun apply(booking: Booking, next: BookingStatus) {
         if (booking.id in ui.value.busyIds) return // a double tap must not send two updates

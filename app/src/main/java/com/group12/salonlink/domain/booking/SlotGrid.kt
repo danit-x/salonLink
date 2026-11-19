@@ -36,6 +36,9 @@ object SlotGrid {
     /** The moment slot [slot] begins. */
     fun startOf(slot: Long): Instant = Instant.ofEpochSecond(slot * SLOT_SECONDS)
 
+    /** [instant] if it is on a slot boundary, else the start of the next slot (10:03 → 10:10). */
+    fun ceil(instant: Instant): Instant = if (isAligned(instant)) instant else startOf(slotOf(instant) + 1)
+
     /** True if [instant] is exactly on a slot boundary (bookings must start on one). */
     fun isAligned(instant: Instant): Boolean =
         instant.nano == 0 && Math.floorMod(instant.epochSecond, SLOT_SECONDS) == 0L

@@ -220,3 +220,4 @@ Tip: switch model per phase in the app's model picker. Keep **one Claude session
 - AI hairstyle *image generation* preview (proposal says "may"): stretch goal only.
 - Server-sent FCM push and Cloud Functions require the Blaze plan. The code is structured so they can be added later without UI changes.
 - Single salon in the demo data, but every query is scoped by `salonId` (NFR-09).
+- **Waitlist without a server (Spark):** the cancelling device (customer or staff) picks who gets a freed slot, so every signed-in user can read waitlist entries (they hold a uid, never a name) and can write an offer onto a waiting entry. A fake offer can't create a bad booking (accepting goes through the booking engine), but it can send a misleading notification. An offer is a 10-minute *first chance*, not a reservation: the time stays bookable by others. With Cloud Functions (Blaze) the offer would be made server-side and the waitlist made private.

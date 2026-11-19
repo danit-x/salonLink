@@ -1,5 +1,6 @@
 package com.group12.salonlink.domain.usecase
 
+import com.group12.salonlink.domain.booking.SlotGrid
 import com.group12.salonlink.domain.model.Booking
 import com.group12.salonlink.domain.model.DataError
 import com.group12.salonlink.domain.model.DataException
@@ -34,7 +35,10 @@ class OfferFreedSlotUseCase @Inject constructor(
     suspend operator fun invoke(freed: Booking): WaitlistEntry? {
         val now = clock.instant()
         if (freed.end <= now) return null // the time has passed: nothing to offer
-        val start = maxOf(freed.start, now)
+        // WHY ceil: after a no-show (always after the start) "now" is mid-slot, and bookings
+        // must start on a 10-minute boundary or the engine refuses them (NOT_ALIGNED).
+        val start = maxOf(freed.start, SlotGrid.ceil(now))
+        if (start >= freed.end) return null
         val freedMinutes = Duration.between(start, freed.end).toMinutes()
         val date = com.group12.salonlink.core.util.SalonTime.localDateOf(freed.start)
 
@@ -44,6 +48,8 @@ class OfferFreedSlotUseCase @Inject constructor(
             return null // the cancellation itself succeeded; the offer is a bonus
         }
             .filter { it.isWaiting(now) && it.staffId == freed.staffId }
+            // Never hand the time back to the person who just gave it up.
+            .filter { it.customerId != freed.customerId }
             .filter { it.durationMin <= freedMinutes && start >= it.windowStart && start < it.windowEnd }
             .sortedBy { it.createdAt }
             .firstOrNull() ?: return null
@@ -86,7 +92,17 @@ class AcceptWaitlistOfferUseCase @Inject constructor(
                 customerName = customerName,
             ),
         )
-        waitlistRepository.markAccepted(entry.salonId, entry.id)
+        try {
+            waitlistRepository.markAccepted(entry.salonId, entry.id)
+        } catch (_: DataException) {
+            // WHY: the booking is already saved. If the offer ran out a moment ago, the rules
+            // refuse ACCEPTED; leaving the waitlist instead stops the entry from being offered
+            // another time. Best effort: the booking is what matters.
+            try {
+                waitlistRepository.leave(entry.salonId, entry.id)
+            } catch (_: DataException) {
+            }
+        }
         return booking
     }
 }

@@ -383,12 +383,12 @@
     <string name="waitlist_title">Waitlist</string>
     <string name="waitlist_waiting">Waiting for %1$s with %2$s</string>
     <string name="waitlist_offer_title">A time freed up: %1$s</string>
-    <string name="waitlist_offer_expires">Hold expires at %1$s</string>
+    <string name="waitlist_offer_expires">Offer ends at %1$s · others can still book this time, so be quick</string>
     <string name="waitlist_accept">Book it</string>
     <string name="waitlist_decline">No thanks</string>
     <string name="waitlist_leave">Leave waitlist</string>
     <string name="waitlist_accepted">Booked! See you at %1$s.</string>
-    <string name="waitlist_offer_body">%1$s · hold it within 10 minutes in Bookings</string>
+    <string name="waitlist_offer_body">%1$s · book it in the next 10 minutes in Bookings</string>
 
     <string name="queue_title">Live queue</string>
     <string name="queue_open">See live queue</string>

@@ -33,7 +33,13 @@ class FakeWaitlistRepository : WaitlistRepository {
         it.copy(status = WaitlistStatus.OFFERED, offer = offer)
     }
 
-    override suspend fun markAccepted(salonId: String, entryId: String) = update(entryId) { it.copy(status = WaitlistStatus.ACCEPTED) }
+    /** Simulates the rules refusing ACCEPTED (the offer ran out while the booking was saved). */
+    var refuseAccept = false
+
+    override suspend fun markAccepted(salonId: String, entryId: String) {
+        if (refuseAccept) throw com.group12.salonlink.domain.model.DataException(com.group12.salonlink.domain.model.DataError.PERMISSION_DENIED)
+        update(entryId) { it.copy(status = WaitlistStatus.ACCEPTED) }
+    }
 
     override suspend fun leave(salonId: String, entryId: String) = update(entryId) { it.copy(status = WaitlistStatus.LEFT) }
 
