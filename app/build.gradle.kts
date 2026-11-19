@@ -1,4 +1,5 @@
 import java.util.Properties
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 
 // =====================================================================================
 // SalonLink — app module build file
@@ -14,7 +15,21 @@ plugins {
     alias(libs.plugins.ksp)                   // Annotation processing for Hilt
     alias(libs.plugins.hilt)                  // Dependency injection
     alias(libs.plugins.google.services)       // Reads app/google-services.json (Firebase config)
+    alias(libs.plugins.firebase.appdistribution) // Uploads test builds to testers (see docs/DISTRIBUTION.md)
 }
+
+// WHY versionCode comes from git: each commit gets a higher number automatically, so testers'
+// phones recognise every new build as an update. Falls back to 1 outside a git checkout.
+val gitCommitCount: Int = providers.exec {
+    commandLine("git", "rev-list", "--count", "HEAD")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }.getOrElse(1)
+
+// Release notes shown to testers: the latest commit's subject line.
+val gitLastCommitSubject: String = providers.exec {
+    commandLine("git", "log", "-1", "--pretty=%s")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim() }.getOrElse("")
 
 android {
     namespace = "com.group12.salonlink"
@@ -24,8 +39,8 @@ android {
         applicationId = "com.group12.salonlink"   // Must match the app registered in Firebase
         minSdk = 26                               // Android 8.0 — proposal NFR-08
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = gitCommitCount
+        versionName = "0.1.$gitCommitCount"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,6 +68,15 @@ android {
             // throwaway accounts. Off by default, and always off in release builds.
             val useEmulators = providers.gradleProperty("salonlink.useEmulators").orNull == "true"
             buildConfigField("boolean", "USE_FIREBASE_EMULATORS", useEmulators.toString())
+
+            // Firebase App Distribution: `./gradlew assembleDebug appDistributionUploadDebug`.
+            // Auth comes from `firebase login` (no key file in the repo). Testers are managed as a
+            // group in the Firebase console; override with -Psalonlink.testerGroups=a,b.
+            firebaseAppDistribution {
+                artifactType = "APK"
+                groups = providers.gradleProperty("salonlink.testerGroups").getOrElse("testers")
+                releaseNotes = gitLastCommitSubject
+            }
         }
         release {
             buildConfigField("boolean", "USE_FIREBASE_EMULATORS", "false")

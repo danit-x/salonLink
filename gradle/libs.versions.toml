@@ -11,6 +11,7 @@ agp = "9.5.1"                       # Android Gradle Plugin (AGP 9 compiles Kotl
 kotlin = "2.4.21"                   # Used by the Compose compiler + serialization plugins
 ksp = "2.3.14"                      # Kotlin Symbol Processing (runs Hilt's code generator)
 googleServices = "4.6.0"            # Reads app/google-services.json
+appDistribution = "5.3.1"           # Firebase App Distribution: uploads test builds to testers
 
 coreKtx = "1.19.1"
 coreSplashscreen = "1.2.0"
@@ -94,3 +95,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "appDistribution" }
