@@ -28,6 +28,41 @@ import kotlinx.serialization.Serializable
 @Serializable data object ConciergeRoute
 @Serializable data object MyStyleRoute
 
+// ---- 2a-i. Customer booking journey (full-screen, no bottom bar, as in Figma) --------
+
+/** Figma "Barber profile". */
+@Serializable data class BarberProfileRoute(val salonId: String, val staffId: String)
+
+/**
+ * The 3-step booking flow as a nested navigation graph. Its two screens (Services, Date & time)
+ * share ONE BookingFlowViewModel that lives as long as this graph is on the back stack, so the
+ * chosen services survive going forward and back.
+ *
+ * @param preselectedServiceIds ticks these services on arrival ("Book again" on Discovery).
+ */
+@Serializable data class BookingFlowRoute(
+    val salonId: String,
+    val staffId: String,
+    val preselectedServiceIds: List<String> = emptyList(),
+)
+
+/** Step 1 of 3, Figma "Service selection". Arguments come from the parent [BookingFlowRoute]. */
+@Serializable data object ServiceSelectionRoute
+
+/** Step 2 of 3, Figma "Date & time". Its "Confirm appointment" button creates the booking. */
+@Serializable data object DateTimeRoute
+
+/**
+ * Step 3 of 3, Figma "Booking confirmation". Also opens an existing booking (from Discovery).
+ *
+ * @param justBooked true right after "Confirm appointment": shows the celebration and "All booked".
+ */
+@Serializable data class BookingConfirmationRoute(
+    val salonId: String,
+    val bookingId: String,
+    val justBooked: Boolean = false,
+)
+
 // ---- 2b. Staff tabs ----------------------------------------------------------------
 @Serializable data object StaffTodayRoute
 @Serializable data object StaffWalkInsRoute

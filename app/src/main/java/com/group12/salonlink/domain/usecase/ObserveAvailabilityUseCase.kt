@@ -3,6 +3,7 @@ package com.group12.salonlink.domain.usecase
 import com.group12.salonlink.core.util.SalonTime
 import com.group12.salonlink.domain.booking.AvailabilityCalculator
 import com.group12.salonlink.domain.booking.DayAvailabilityInput
+import com.group12.salonlink.domain.booking.SlotOption
 import com.group12.salonlink.domain.repository.BookingRepository
 import com.group12.salonlink.domain.repository.SalonRepository
 import java.time.Clock
@@ -37,6 +38,22 @@ class ObserveAvailabilityUseCase @Inject constructor(
         observeDayInput(salonId, staffId, date).map { input ->
             if (input == null || durationMin <= 0) emptyList()
             else AvailabilityCalculator.availableStarts(input, durationMin, stepMin)
+        }
+
+    /**
+     * Like [invoke], but keeps unavailable times too (marked with their [SlotOption.problem]),
+     * so the screen can show them struck through as in the Figma time grid.
+     */
+    fun dayOptions(
+        salonId: String,
+        staffId: String,
+        date: LocalDate,
+        durationMin: Int,
+        stepMin: Long = AvailabilityCalculator.DEFAULT_STEP_MIN,
+    ): Flow<List<SlotOption>> =
+        observeDayInput(salonId, staffId, date).map { input ->
+            if (input == null || durationMin <= 0) emptyList()
+            else AvailabilityCalculator.dayOptions(input, durationMin, stepMin)
         }
 
     /**

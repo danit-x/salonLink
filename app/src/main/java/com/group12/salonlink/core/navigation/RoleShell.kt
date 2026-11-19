@@ -38,11 +38,16 @@ fun RoleShell(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
+    // The bar shows only on the tab screens themselves. Screens pushed on top (e.g. the booking
+    // flow) are full-screen, like their Figma frames.
+    val onTabScreen = currentDestination == null ||
+        tabs.any { item -> currentDestination.hierarchy.any { it.hasRoute(item.route::class) } }
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            SalonBottomBar(
+            if (onTabScreen) SalonBottomBar(
                 items = tabs,
                 isSelected = { item ->
                     currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true

@@ -120,4 +120,24 @@ class AvailabilityCalculatorTest {
     fun `step must be a multiple of the slot size`() {
         AvailabilityCalculator.availableStarts(base, 30, stepMin = 15)
     }
+
+    @Test
+    fun `day options keep taken times so the grid can strike them through`() {
+        // 16:00–16:30 is taken (the struck-through "4:00 pm" in Figma).
+        val input = base.copy(takenSlots = SlotGrid.slotsBetween(at(16), at(16, 30)).toSet())
+        val options = AvailabilityCalculator.dayOptions(input, durationMin = 30)
+        assertEquals(20, options.size)
+        assertEquals(SlotProblem.TAKEN, options.first { it.start == at(16) }.problem)
+        assertTrue(options.first { it.start == at(16, 30) }.isAvailable)
+        // availableStarts is exactly the free subset.
+        assertEquals(options.filter { it.isAvailable }.map { it.start }, AvailabilityCalculator.availableStarts(input, 30))
+    }
+
+    @Test
+    fun `day options leave out times that have already gone`() {
+        val input = base.copy(earliestStart = at(17))
+        val options = AvailabilityCalculator.dayOptions(input, durationMin = 30)
+        assertEquals(at(17), options.first().start)
+        assertFalse(options.any { it.problem == SlotProblem.IN_PAST })
+    }
 }

@@ -62,12 +62,28 @@ data class SalonColors(
     val tealContainer: Color = Color(0xFFE6F3F4),
     val navIndicator: Color = Color(0xFFF0EAFB),
 
+    /**
+     * Specialty chips on "Barber profile" (Fade, Colour, Curly Hair, Beard Styling): each chip
+     * takes the next (background, text) pair in turn, so neighbours never share a colour.
+     */
+    val tagPalette: List<Pair<Color, Color>> = listOf(
+        Color(0xFFF7E8FF) to Color(0xFF7A4B8D), // lavender / plum
+        Color(0xFFFFF1E8) to Coral,             // peach / coral
+        Color(0xFFEAF3FF) to Color(0xFF5B7C9A), // sky / slate blue
+        Color(0xFFFFF7E8) to Coral,             // butter / coral
+    ),
+
     // Soft coloured shadows from Figma (0 5 16 rgba(75,59,87,.06) and 0 6 16 rgba(100,86,170,.13)).
     val shadowSoft: Color = Color(0x0F4B3B57),
     val shadowPrimary: Color = Color(0x216456AA),
 
     /** Primary call-to-action gradient (top → bottom). */
     val brandGradient: Brush = Brush.verticalGradient(listOf(GradientStart, GradientMid, GradientEnd)),
+
+    /** The concierge "orb" on Discovery (Figma "Concierge invitation"). */
+    val conciergeOrb: Brush = Brush.verticalGradient(
+        listOf(Color(0xFF9F9AF2), Color(0xFF8065CF), Color(0xFFBF81C2)),
+    ),
 
     /** Background of a selected option card (lavender → periwinkle → mint). */
     val selectedGradient: Brush = Brush.verticalGradient(

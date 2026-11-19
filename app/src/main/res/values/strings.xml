@@ -84,14 +84,152 @@
     <string name="tab_concierge">Concierge</string>
     <string name="tab_my_style">My style</string>
 
-    <string name="explore_placeholder_title">Discover your next great cut</string>
-    <string name="explore_placeholder_message">Salons, barbers, categories and your upcoming appointment, built from the Figma Discovery screen.</string>
     <string name="bookings_placeholder_title">Your bookings</string>
     <string name="bookings_placeholder_message">Upcoming visits, booking history and free cancellation.</string>
     <string name="concierge_on_hold_title">Your salon concierge is on its way</string>
     <string name="concierge_on_hold_message">Booking by chat (\"a haircut tomorrow after 5\") will arrive in a later release. Until then, booking from Explore takes three taps.</string>
     <string name="style_placeholder_title">My style profile</string>
     <string name="style_placeholder_message">Your hair notes, moodboard photos and favourite barber, shared only with your consent.</string>
+
+    <!-- ===================== Phase 4: customer booking journey ===================== -->
+
+    <!-- Shared -->
+    <string name="action_retry">Try again</string>
+    <string name="label_today">Today</string>
+    <string name="label_tomorrow">Tomorrow</string>
+    <string name="label_total">Total</string>
+    <string name="rating_value">★ %1$s</string>
+    <string name="cd_photo_of">Photo of %1$s</string>
+    <string name="cd_selected">Selected</string>
+    <string name="cd_not_selected">Not selected</string>
+
+    <!-- Data errors (NFR-10: always tell the user what went wrong) -->
+    <string name="data_error_network">No connection. Check your internet and try again.</string>
+    <string name="data_error_permission">You don\'t have access to this.</string>
+    <string name="data_error_not_found">We couldn\'t find that. It may have been removed.</string>
+    <string name="data_error_slot_taken">Someone just booked that time. Please pick another one.</string>
+    <string name="data_error_not_allowed">That change isn\'t allowed any more.</string>
+    <string name="data_error_invalid">Something in this booking isn\'t valid. Please go back and try again.</string>
+    <string name="data_error_unknown">Something went wrong. Please try again.</string>
+    <string name="slot_problem_closed">%1$s isn\'t working that day.</string>
+    <string name="slot_problem_outside_hours">That time is outside working hours.</string>
+    <string name="slot_problem_blocked">%1$s is on a break then. Please pick another time.</string>
+    <string name="slot_problem_in_past">That time has already passed. Please pick a later one.</string>
+    <string name="slot_problem_too_long">That\'s too many services for one visit. Please book some separately.</string>
+
+    <!-- Discovery (Figma "Discovery") -->
+    <string name="greeting_morning">Good morning, %1$s</string>
+    <string name="greeting_afternoon">Good afternoon, %1$s</string>
+    <string name="greeting_evening">Good evening, %1$s</string>
+    <string name="discovery_headline">Good hair. Good energy.</string>
+    <string name="discovery_search_placeholder">Find your salon, barber or style</string>
+    <string name="category_haircuts">Haircuts</string>
+    <string name="category_colour">Colour</string>
+    <string name="category_beard">Beard</string>
+    <string name="category_all">All styles</string>
+    <string name="discovery_featured_title">Your next great cut</string>
+    <string name="discovery_tag_top_rated">Top rated</string>
+    <string name="discovery_featured_meta">★ %1$s (%2$d) · From %3$s</string>
+    <string name="discovery_see_times">See times ↗</string>
+    <string name="discovery_more_barbers">More barbers</string>
+    <string name="discovery_no_match">No barber matches that yet. Try another word or category.</string>
+    <string name="discovery_no_barbers">No barbers are taking bookings right now.</string>
+    <string name="discovery_ask_title">Ask SalonLink</string>
+    <string name="discovery_ask_placeholder">Book a haircut tomorrow evening</string>
+    <string name="discovery_upcoming_title">Upcoming appointment</string>
+    <string name="discovery_quick_actions">Quick actions</string>
+    <string name="action_book">Book</string>
+    <string name="action_book_again">Book Again</string>
+    <string name="discovery_concierge_title">A little style guidance?</string>
+    <string name="discovery_concierge_body">Meet your AI salon concierge. Find a look that feels like you.</string>
+    <string name="discovery_bookings_error">Your appointments couldn\'t be loaded just now.</string>
+
+    <!-- Barber profile (Figma "Barber profile") -->
+    <string name="barber_title">Meet your barber</string>
+    <plurals name="barber_experience">
+        <item quantity="one">%1$d year of good hair</item>
+        <item quantity="other">%1$d years of good hair</item>
+    </plurals>
+    <plurals name="barber_salon_reviews">
+        <item quantity="one">%1$s  ·  %2$d review</item>
+        <item quantity="other">%1$s  ·  %2$d reviews</item>
+    </plurals>
+    <string name="barber_portfolio_title">The craft, up close</string>
+    <string name="cd_portfolio_photo">Work by %1$s, photo %2$d</string>
+    <string name="barber_book_with">Book with %1$s</string>
+    <string name="barber_footer">From %1$s  ·  Free cancellation up to %2$d hours before</string>
+
+    <!-- Booking flow: shared -->
+    <string name="step_services">Services</string>
+    <string name="step_date_time">Date &amp; time</string>
+    <string name="step_confirm">Confirm</string>
+    <string name="salon_and_area">%1$s · %2$s</string>
+    <string name="salon_with_area">%1$s, %2$s</string>
+    <string name="datetime_selected">%1$s · %2$s</string>
+
+    <!-- Service selection (Figma "Service selection", step 1 of 3) -->
+    <string name="services_title">Your booking</string>
+    <string name="services_step">Step 1 of 3</string>
+    <string name="services_headline">Make it your own.</string>
+    <string name="services_body">A fresh cut, a little detail. Pick the services that feel right for you.</string>
+    <string name="service_meta">%1$d min  ·  %2$s</string>
+    <plurals name="services_selected">
+        <item quantity="one">%1$d service selected</item>
+        <item quantity="other">%1$d services selected</item>
+    </plurals>
+    <string name="services_none_selected">No services selected</string>
+    <string name="services_duration">%1$d minutes of you time</string>
+    <string name="services_pick_hint">Tap a service to add it</string>
+    <string name="services_continue">Choose date &amp; time</string>
+    <string name="services_empty">%1$s has no services to book right now.</string>
+
+    <!-- Date & time (Figma "Date & time", step 2 of 3) -->
+    <string name="datetime_title">Your appointment</string>
+    <string name="datetime_step">Step 2 of 3 · Services selected</string>
+    <string name="datetime_headline">Pick a time.</string>
+    <string name="datetime_body">Choose a slot for %1$s at %2$s.</string>
+    <plurals name="datetime_barber_summary">
+        <item quantity="one">%1$s · %2$d service · %3$d min · %4$s</item>
+        <item quantity="other">%1$s · %2$d services · %3$d min · %4$s</item>
+    </plurals>
+    <string name="datetime_month">%1$s · %2$s</string>
+    <string name="cd_previous_month">Previous month</string>
+    <string name="cd_next_month">Next month</string>
+    <string name="datetime_zone">Colombo · IST (UTC+5:30)</string>
+    <string name="datetime_ends_at">Your appointment ends at %1$s.</string>
+    <string name="datetime_no_slots">No free times left on this day. Try another date.</string>
+    <string name="datetime_day_off">%1$s isn\'t working on this day. Try another date.</string>
+    <string name="datetime_pick_date">Pick a day to see the free times.</string>
+    <string name="datetime_pick_time">Pick a time</string>
+    <string name="datetime_confirm">Confirm appointment</string>
+    <string name="datetime_payment_note">Pay at the salon · No mandatory online payment</string>
+    <string name="cd_time_unavailable">%1$s, unavailable</string>
+
+    <!-- Booking confirmation (Figma "Booking confirmation") -->
+    <string name="confirmation_title">All booked</string>
+    <string name="confirmation_title_existing">Your booking</string>
+    <string name="confirmation_eyebrow">IT\'S A GOOD HAIR DATE</string>
+    <string name="confirmation_headline">You\'re in, %1$s.</string>
+    <string name="confirmation_body">%1$s\'s looking forward to seeing you. Your next great look is on the calendar.</string>
+    <string name="confirmation_reference">SL-%1$s</string>
+    <string name="confirmation_service_meta">%1$d min · with %2$s</string>
+    <string name="confirmation_pay_label">Pay at Salon</string>
+    <string name="confirmation_pay_methods">Cash / Card at Salon</string>
+    <string name="confirmation_add_calendar">Add to calendar</string>
+    <string name="confirmation_view_booking">View my booking</string>
+    <string name="confirmation_policy">Plans change. Cancel free until %1$s. You\'ll find this booking under Bookings.</string>
+    <string name="confirmation_policy_late">You\'ll find this booking any time under Bookings.</string>
+    <string name="confirmation_share_text">My SalonLink booking: %1$s with %2$s at %3$s, %4$s, %5$s.</string>
+    <string name="cd_share_booking">Share booking</string>
+    <string name="calendar_event_title">%1$s at %2$s</string>
+    <string name="no_app_for_action">No app on this phone can do that.</string>
+    <string name="status_booked">Confirmed</string>
+    <string name="status_checked_in">Checked in</string>
+    <string name="status_waiting">Waiting</string>
+    <string name="status_in_service">In the chair</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_missed">Missed</string>
 
     <!-- Staff tabs -->
     <string name="tab_today">Today</string>

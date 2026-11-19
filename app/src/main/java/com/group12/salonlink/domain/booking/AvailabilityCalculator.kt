@@ -38,6 +38,15 @@ data class DayAvailabilityInput(
 )
 
 /**
+ * One button in the time grid.
+ *
+ * @property problem null = bookable. Otherwise why not (taken, break, past closing…).
+ */
+data class SlotOption(val start: Instant, val problem: SlotProblem?) {
+    val isAvailable: Boolean get() = problem == null
+}
+
+/**
  * The heart of the booking engine: a PURE function from "the facts of the day" to "the times
  * a customer may choose". No Firebase, no clock, no threads, so it is fully unit-tested
  * (AvailabilityCalculatorTest) and gives the same answer on every phone.
@@ -60,7 +69,20 @@ object AvailabilityCalculator {
         input: DayAvailabilityInput,
         durationMin: Int,
         stepMin: Long = DEFAULT_STEP_MIN,
-    ): List<Instant> {
+    ): List<Instant> = dayOptions(input, durationMin, stepMin).filter { it.isAvailable }.map { it.start }
+
+    /**
+     * Every candidate start time of the day with its verdict, for the Figma time grid, which
+     * shows a taken time (e.g. "4:00 pm") struck through instead of hiding it.
+     *
+     * Times that have already gone ([SlotProblem.IN_PAST]) are left out: showing them crossed
+     * out would only clutter the grid.
+     */
+    fun dayOptions(
+        input: DayAvailabilityInput,
+        durationMin: Int,
+        stepMin: Long = DEFAULT_STEP_MIN,
+    ): List<SlotOption> {
         require(durationMin > 0) { "durationMin must be positive" }
         require(stepMin > 0 && stepMin % SlotGrid.SLOT_MINUTES == 0L) {
             "stepMin must be a positive multiple of ${SlotGrid.SLOT_MINUTES}"
@@ -73,7 +95,8 @@ object AvailabilityCalculator {
 
         return generateSequence(first) { it.plusSeconds(stepMin * 60) }
             .takeWhile { it < close }
-            .filter { start -> check(input, start, durationMin) == null }
+            .map { start -> SlotOption(start, check(input, start, durationMin)) }
+            .filter { it.problem != SlotProblem.IN_PAST }
             .toList()
     }
 

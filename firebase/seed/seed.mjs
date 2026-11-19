@@ -92,8 +92,14 @@ const staff = {
     rating: 4.9,
     reviewCount: 128,
     yearsExperience: 8,
-    photoUrl: null, // the app shows a bundled placeholder until real photos are added
-    portfolioUrls: [],
+    // Photos from the Figma design, bundled in the APK (app/src/main/assets/demo) because
+    // Cloud Storage needs the Blaze plan. Coil loads file:///android_asset/ and https URLs alike.
+    photoUrl: "file:///android_asset/demo/kasun-portrait.jpg",
+    portfolioUrls: [
+      "file:///android_asset/demo/kasun-work-1.jpg",
+      "file:///android_asset/demo/kasun-work-2.jpg",
+      "file:///android_asset/demo/kasun-work-3.jpg",
+    ],
     workingHours: hours(["MON", "TUE", "WED", "THU", "FRI", "SAT"], "09:00", "19:00"),
     active: true,
   },

@@ -36,8 +36,8 @@ import com.group12.salonlink.core.designsystem.theme.Spacing
 import com.group12.salonlink.domain.model.AuthError
 import com.group12.salonlink.feature.auth.AuthScaffold
 import com.group12.salonlink.feature.auth.AuthSwitchPrompt
-import com.group12.salonlink.feature.auth.BannerTone
-import com.group12.salonlink.feature.auth.FormBanner
+import com.group12.salonlink.core.designsystem.component.BannerTone
+import com.group12.salonlink.core.designsystem.component.FormBanner
 import com.group12.salonlink.feature.auth.PasswordVisibilityToggle
 import com.group12.salonlink.feature.auth.messageRes
 

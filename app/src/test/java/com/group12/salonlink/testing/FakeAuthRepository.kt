@@ -59,6 +59,11 @@ class FakeAuthRepository : AuthRepository {
         resetEmailsSent += email
     }
 
+    /** Test helper: start the test already signed in as [user]. */
+    fun signInAs(user: UserProfile) {
+        _authState.value = AuthState.SignedIn(user)
+    }
+
     override fun signOut() {
         _authState.value = AuthState.SignedOut
     }

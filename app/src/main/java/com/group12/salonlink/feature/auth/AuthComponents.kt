@@ -86,32 +86,6 @@ fun AuthScaffold(
     }
 }
 
-/** Kind of [FormBanner]: an error (coral) or a neutral confirmation (lavender). */
-enum class BannerTone { ERROR, INFO }
-
-/**
- * Message box above the submit button, styled like the Figma live-queue notice
- * (peach gradient). `liveRegion` makes TalkBack read it out as soon as it appears.
- */
-@Composable
-fun FormBanner(message: String, tone: BannerTone, modifier: Modifier = Modifier) {
-    val colors = SalonTheme.colors
-    val (brush, textColor) = when (tone) {
-        BannerTone.ERROR -> Brush.horizontalGradient(listOf(Color(0xFFFFF1E8), Color(0xFFFBE3EA))) to colors.coral
-        BannerTone.INFO -> colors.selectedGradient to colors.violet
-    }
-    Text(
-        text = message,
-        style = MaterialTheme.typography.bodyMedium,
-        color = textColor,
-        modifier = modifier
-            .fillMaxWidth()
-            .background(brush, RoundedCornerShape(18.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .semantics { liveRegion = LiveRegionMode.Polite },
-    )
-}
-
 /** "Show" / "Hide" text toggle for password fields (clearer than an eye icon for TalkBack). */
 @Composable
 fun PasswordVisibilityToggle(visible: Boolean, onToggle: () -> Unit) {

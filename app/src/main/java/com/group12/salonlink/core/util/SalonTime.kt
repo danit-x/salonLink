@@ -3,6 +3,7 @@ package com.group12.salonlink.core.util
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -25,6 +26,8 @@ object SalonTime {
     private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
     private val shortDateFormatter = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.ENGLISH)
     private val longDateFormatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.ENGLISH)
+    private val monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH)
+    private val dayHeadingFormatter = DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.ENGLISH)
 
     /** Converts a salon-local date + wall-clock time into the UTC instant we store. */
     fun toInstant(date: LocalDate, time: LocalTime): Instant =
@@ -48,6 +51,12 @@ object SalonTime {
 
     /** "Thursday, 8 October 2026" */
     fun formatLongDate(instant: Instant): String = longDateFormatter.format(instant.atZone(SALON_ZONE))
+
+    /** "October 2026" (Date & time calendar header). */
+    fun formatMonth(month: YearMonth): String = monthFormatter.format(month)
+
+    /** "Thursday, 8 October" (heading above the time grid). */
+    fun formatDayHeading(date: LocalDate): String = dayHeadingFormatter.format(date)
 
     /** "5:30 pm – 6:20 pm" */
     fun formatRange(start: Instant, end: Instant): String = "${formatTime(start)} – ${formatTime(end)}"

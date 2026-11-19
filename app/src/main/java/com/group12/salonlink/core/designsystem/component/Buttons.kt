@@ -99,6 +99,7 @@ fun GlassButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     @DrawableRes leadingIcon: Int? = null,
+    @DrawableRes trailingIcon: Int? = null,
     containerColor: Color = SalonTheme.colors.glass,
     contentColor: Color = SalonTheme.colors.violet,
     enabled: Boolean = true,
@@ -125,6 +126,14 @@ fun GlassButton(
             )
         }
         Text(text = text, style = MaterialTheme.typography.labelLarge, color = contentColor)
+        if (trailingIcon != null) {
+            Icon(
+                painter = painterResource(trailingIcon),
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }
 

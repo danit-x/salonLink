@@ -50,6 +50,9 @@ class FakeBookingRepository : BookingRepository {
     var createCalls = 0
         private set
 
+    /** When set, the next createBooking fails with it (e.g. NETWORK, or SLOT_TAKEN for a lost race). */
+    var nextCreateError: DataException? = null
+
     override fun observeBooking(salonId: String, bookingId: String) = bookings.map { it[bookingId] }
     override fun observeCustomerBookings(customerId: String) =
         bookings.map { all -> all.values.filter { it.customerId == customerId }.sortedByDescending { it.start } }
@@ -63,6 +66,7 @@ class FakeBookingRepository : BookingRepository {
 
     override suspend fun createBooking(booking: Booking): Booking {
         createCalls++
+        nextCreateError?.let { nextCreateError = null; throw it }
         bookings.value[booking.id]?.let { return it } // idempotent, like the real one
         val slots = SlotGrid.slotsBetween(booking.start, booking.end).map { booking.staffId to it }
         if (slots.any { it in locks.value }) throw DataException(DataError.SLOT_TAKEN)

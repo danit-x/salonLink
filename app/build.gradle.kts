@@ -82,6 +82,10 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.kotlinx.coroutines.play.services)   // lets us `await()` Firebase Tasks
 
+    // --- Images: barber portraits and portfolio photos ---
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
     // --- Unit tests (run on the JVM, no device needed) ---
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
