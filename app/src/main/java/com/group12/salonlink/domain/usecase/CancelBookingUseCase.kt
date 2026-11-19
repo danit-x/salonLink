@@ -19,13 +19,14 @@ import kotlinx.coroutines.flow.first
  *  1. Customers may cancel only up to 24 h before the start ([BookingPolicy]); staff any time.
  *  2. The repository's transaction marks it CANCELLED and deletes its slot locks.
  *  3. The customer gets a "Booking cancelled" entry in their notification feed.
- *  4. (Phase 7) the freed time is offered to the waitlist.
+ *  4. The freed time is offered to the first waiting customer ([OfferFreedSlotUseCase]).
  *
  * @throws DataException TOO_LATE_TO_CANCEL / NOT_ALLOWED / NOT_FOUND / NETWORK…
  */
 class CancelBookingUseCase @Inject constructor(
     private val bookingRepository: BookingRepository,
     private val notificationRepository: NotificationRepository,
+    private val offerFreedSlot: OfferFreedSlotUseCase,
     private val clock: Clock,
 ) {
     /** @param byStaff true when salon staff cancel (no 24 h limit). */
@@ -43,6 +44,7 @@ class CancelBookingUseCase @Inject constructor(
         booking.customerId?.let { customer ->
             notificationRepository.addBestEffort(customer, AppNotification.about(booking, NotificationType.BOOKING_CANCELLED))
         }
+        offerFreedSlot(booking)
     }
 }
 

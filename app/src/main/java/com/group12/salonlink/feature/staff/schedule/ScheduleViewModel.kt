@@ -16,6 +16,9 @@ import com.group12.salonlink.domain.model.UserProfile
 import com.group12.salonlink.domain.repository.AuthRepository
 import com.group12.salonlink.domain.repository.BookingRepository
 import com.group12.salonlink.domain.repository.SalonRepository
+import com.group12.salonlink.domain.repository.QueueRepository
+import com.group12.salonlink.domain.model.QueueEntry
+import com.group12.salonlink.domain.queue.QueueEtaCalculator
 import com.group12.salonlink.domain.usecase.UpdateBookingStatusUseCase
 import com.group12.salonlink.feature.customer.booking.toDataError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -115,6 +118,7 @@ class ScheduleViewModel @Inject constructor(
     private val bookingRepository: BookingRepository,
     private val salonRepository: SalonRepository,
     private val updateStatus: UpdateBookingStatusUseCase,
+    private val queueRepository: QueueRepository,
     clock: Clock,
 ) : ViewModel() {
 
@@ -169,6 +173,34 @@ class ScheduleViewModel @Inject constructor(
             error = (day as? Day.Failed)?.error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ScheduleUiState(date = today))
+
+    /** What was last published per barber, to skip writes when nothing changed. */
+    private val lastPublished = mutableMapOf<String, List<QueueEntry>>()
+
+    init {
+        // WHY here: the salon's staff app is open all day, so it acts as the "server" for the
+        // live queue. Every change to today's bookings refreshes the anonymous boards customers
+        // read (Phase 7). Only today's board matters, so other days are never published.
+        viewModelScope.launch {
+            combine(user, ui.map { it.date }.distinctUntilChanged(), day) { u, date, day -> Triple(u, date, day) }
+                .collect { (u, date, day) ->
+                    val ready = day as? Day.Ready ?: return@collect
+                    val salonId = u.salonId ?: return@collect
+                    if (date != today) return@collect
+                    val staffIds = if (u.role == Role.OWNER) ready.staff.map { it.id } else listOfNotNull(u.staffId)
+                    staffIds.forEach { staffId ->
+                        val entries = QueueEtaCalculator.boardEntries(ready.bookings.filter { it.staffId == staffId })
+                        if (lastPublished[staffId] == entries) return@forEach
+                        try {
+                            queueRepository.publish(salonId, staffId, entries)
+                            lastPublished[staffId] = entries
+                        } catch (_: DataException) {
+                            // Offline: the next change (or reconnect) publishes again.
+                        }
+                    }
+                }
+        }
+    }
 
     fun onEvent(event: ScheduleEvent) {
         when (event) {

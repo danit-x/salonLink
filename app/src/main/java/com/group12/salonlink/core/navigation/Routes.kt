@@ -30,6 +30,9 @@ import kotlinx.serialization.Serializable
 
 // ---- 2a-i. Customer booking journey (full-screen, no bottom bar, as in Figma) --------
 
+/** My place in today's queue for one booking (Phase 7). */
+@Serializable data class LiveQueueRoute(val salonId: String, val bookingId: String)
+
 /** The notification feed behind the bell on Explore. */
 @Serializable data object NotificationsRoute
 

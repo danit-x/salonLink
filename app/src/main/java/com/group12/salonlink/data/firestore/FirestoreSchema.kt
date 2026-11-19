@@ -31,6 +31,27 @@ object FirestoreSchema {
     const val SLOT_LOCKS = "slotLocks" // sub-collection of salons/{id}
     const val NOTIFICATIONS = "notifications" // sub-collection of users/{uid}
     const val WAITLIST = "waitlist"   // sub-collection of salons/{id} (Phase 7)
+    const val QUEUE = "queue"         // sub-collection of salons/{id}: one anonymous board per barber (Phase 7)
+
+    // --- salons/{id}/waitlist/{id} fields ---
+    object WaitlistFields {
+        const val CUSTOMER_ID = "customerId"
+        const val STAFF_ID = "staffId"
+        const val SERVICE_IDS = "serviceIds"
+        const val DURATION_MIN = "durationMin"
+        const val DATE = "date"                 // "2026-12-03" (salon-local day)
+        const val WINDOW_START = "windowStart"
+        const val WINDOW_END = "windowEnd"
+        const val STATUS = "status"
+        const val OFFER = "offer"               // { start, end, staffId, expiresAt } or null
+        const val CREATED_AT = "createdAt"
+    }
+
+    // --- salons/{id}/queue/{staffId} fields ---
+    object QueueFields {
+        const val ENTRIES = "entries"           // list of { bookingId, start, durationMin, status, type, since }
+        const val UPDATED_AT = "updatedAt"
+    }
 
     // --- users/{uid}/notifications/{id} fields ---
     object NotificationFields {

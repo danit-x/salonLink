@@ -9,6 +9,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.group12.salonlink.core.navigation.NotificationsRoute
+import com.group12.salonlink.core.navigation.LiveQueueRoute
+import com.group12.salonlink.domain.model.NotificationType
+import com.group12.salonlink.feature.customer.queue.LiveQueueScreen
+import com.group12.salonlink.feature.customer.queue.LiveQueueViewModel
 import com.group12.salonlink.feature.customer.bookings.MyBookingsScreen
 import com.group12.salonlink.feature.customer.bookings.MyBookingsViewModel
 import com.group12.salonlink.feature.customer.notifications.NotificationsScreen
@@ -107,7 +111,9 @@ fun CustomerShell(
                 onBack = { navController.popBackStack() },
                 onOpen = {
                     viewModel.markRead(it)
-                    navController.navigate(BookingConfirmationRoute(it.salonId, it.bookingId))
+                    // A waitlist offer is answered in the Bookings tab; everything else opens its booking.
+                    if (it.type == NotificationType.WAITLIST_OFFER) navController.navigateToTab(BookingsRoute)
+                    else navController.navigate(BookingConfirmationRoute(it.salonId, it.bookingId))
                 },
                 onMarkAllRead = viewModel::markAllRead,
             )
@@ -166,6 +172,7 @@ private fun DiscoveryRoute(navController: NavHostController, unreadCount: Int, v
             onOpenBooking = { navController.navigate(BookingConfirmationRoute(it.salonId, it.id)) },
             onOpenConcierge = { navController.navigateToTab(ConciergeRoute) },
             onOpenNotifications = { navController.navigate(NotificationsRoute) },
+            onOpenQueue = { navController.navigate(LiveQueueRoute(it.salonId, it.id)) },
         ),
     )
 }
@@ -229,7 +236,15 @@ private fun NavGraphBuilder.bookingJourney(navController: NavHostController) {
             onBack = { navController.popBackStack() },
             onViewBookings = { navController.navigateToTab(BookingsRoute) },
             onEvent = viewModel::onEvent,
+            onOpenQueue = { navController.navigate(LiveQueueRoute(it.salonId, it.id)) },
         )
+    }
+
+    composable<LiveQueueRoute> { entry ->
+        val args = entry.toRoute<LiveQueueRoute>()
+        val viewModel = hiltViewModel<LiveQueueViewModel, LiveQueueViewModel.Factory>(creationCallback = { it.create(args) })
+        val state by viewModel.uiState.collectAsStateWithLifecycle()
+        LiveQueueScreen(state, onBack = { navController.popBackStack() })
     }
 }
 

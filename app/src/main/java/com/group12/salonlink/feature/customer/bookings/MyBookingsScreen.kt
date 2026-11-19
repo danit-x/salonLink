@@ -73,9 +73,13 @@ fun MyBookingsScreen(
     val snackbar = remember { SnackbarHostState() }
     val cancelledText = stringResource(R.string.bookings_cancelled_message)
     val failure = (state.message as? BookingsMessage.Failed)?.error?.message()
+    val acceptedText = (state.message as? BookingsMessage.Accepted)?.let {
+        stringResource(R.string.waitlist_accepted, "${SalonTime.formatShortDate(it.start)}, ${SalonTime.formatTime(it.start)}")
+    }
     LaunchedEffect(state.message) {
         val text = when (state.message) {
             BookingsMessage.Cancelled -> cancelledText
+            is BookingsMessage.Accepted -> acceptedText
             is BookingsMessage.Failed -> failure
             null -> null
         } ?: return@LaunchedEffect
@@ -87,6 +91,7 @@ fun MyBookingsScreen(
         Column(Modifier.fillMaxSize()) {
             SalonTopBar(title = stringResource(R.string.bookings_title))
             TabSwitcher(state, onEvent)
+            if (state.waitlist.isNotEmpty()) WaitlistSection(state, onEvent)
             when {
                 state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
@@ -250,4 +255,62 @@ private fun EmptyState(tab: BookingsTab, onBookNow: () -> Unit) {
 @Composable
 private fun MyBookingsEmptyPreview() {
     SalonLinkTheme { MyBookingsScreen(MyBookingsUiState(loading = false), {}, {}, {}) }
+}
+
+/**
+ * Waitlist entries above the list. An open offer is highlighted with "Book it" / "No thanks"
+ * and the time it is held until (10 minutes, proposal FR-11).
+ */
+@Composable
+private fun WaitlistSection(state: MyBookingsUiState, onEvent: (MyBookingsEvent) -> Unit) {
+    val colors = SalonTheme.colors
+    Column(
+        modifier = Modifier.padding(horizontal = Spacing.screenHorizontal, vertical = Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(stringResource(R.string.waitlist_title), style = MaterialTheme.typography.titleMedium)
+        state.waitlist.forEach { row ->
+            val entry = row.entry
+            val offer = entry.offer
+            GlassSurface(
+                modifier = Modifier.fillMaxWidth(),
+                color = if (row.offerOpen) colors.navIndicator else colors.glass,
+                contentPadding = 14.dp,
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (row.offerOpen && offer != null) {
+                        Text(
+                            stringResource(R.string.waitlist_offer_title, "${SalonTime.formatShortDate(offer.start)}, ${SalonTime.formatTime(offer.start)}"),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = colors.violet,
+                        )
+                        Text(
+                            stringResource(R.string.waitlist_offer_expires, SalonTime.formatTime(offer.expiresAt)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            GradientButton(
+                                stringResource(R.string.waitlist_accept),
+                                { onEvent(MyBookingsEvent.AcceptOffer(entry.id)) },
+                                Modifier.weight(1f),
+                                loading = state.busyWaitlistId == entry.id,
+                            )
+                            TextButton(onClick = { onEvent(MyBookingsEvent.LeaveWaitlist(entry.id)) }) {
+                                Text(stringResource(R.string.waitlist_decline))
+                            }
+                        }
+                    } else {
+                        Text(
+                            stringResource(R.string.waitlist_waiting, SalonTime.formatDayHeading(entry.date), row.staffName),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        TextButton(onClick = { onEvent(MyBookingsEvent.LeaveWaitlist(entry.id)) }, enabled = state.busyWaitlistId == null) {
+                            Text(stringResource(R.string.waitlist_leave))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

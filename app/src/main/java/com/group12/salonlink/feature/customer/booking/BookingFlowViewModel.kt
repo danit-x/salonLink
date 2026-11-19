@@ -19,6 +19,9 @@ import com.group12.salonlink.domain.model.SlotUnavailableException
 import com.group12.salonlink.domain.model.Staff
 import com.group12.salonlink.domain.repository.AuthRepository
 import com.group12.salonlink.domain.repository.SalonRepository
+import com.group12.salonlink.domain.repository.WaitlistRepository
+import com.group12.salonlink.domain.model.WaitlistEntry
+import com.group12.salonlink.domain.model.WaitlistStatus
 import com.group12.salonlink.domain.usecase.BookingRequest
 import com.group12.salonlink.domain.usecase.CreateBookingUseCase
 import com.group12.salonlink.domain.usecase.ObserveAvailabilityUseCase
@@ -92,6 +95,9 @@ data class BookingFlowUiState(
     val submitting: Boolean = false,
     val submitError: SubmitError? = null,
     val confirmedBookingId: String? = null,
+    /** The day the customer joined the waitlist for (shown as a confirmation). */
+    val waitlistJoinedDate: LocalDate? = null,
+    val joiningWaitlist: Boolean = false,
 ) {
     /** Chosen services, in the salon's catalogue order. */
     val selectedServices: List<SalonService> get() = services.filter { it.id in selectedServiceIds }
@@ -123,6 +129,8 @@ sealed interface BookingFlowEvent {
     data object Confirm : BookingFlowEvent
     data object DismissError : BookingFlowEvent
     data object ConfirmationShown : BookingFlowEvent
+    /** No time suits: be offered one if somebody cancels on the selected day (Phase 7). */
+    data object JoinWaitlist : BookingFlowEvent
 }
 
 /**
@@ -149,6 +157,7 @@ class BookingFlowViewModel @AssistedInject constructor(
     private val authRepository: AuthRepository,
     private val observeAvailability: ObserveAvailabilityUseCase,
     private val createBooking: CreateBookingUseCase,
+    private val waitlistRepository: WaitlistRepository,
     clock: Clock,
 ) : ViewModel() {
 
@@ -171,6 +180,8 @@ class BookingFlowViewModel @AssistedInject constructor(
         val submitting: Boolean = false,
         val submitError: SubmitError? = null,
         val confirmedBookingId: String? = null,
+        val waitlistJoinedDate: LocalDate? = null,
+        val joiningWaitlist: Boolean = false,
     )
 
     private sealed interface Catalogue {
@@ -247,6 +258,8 @@ class BookingFlowViewModel @AssistedInject constructor(
             submitting = form.submitting,
             submitError = form.submitError,
             confirmedBookingId = form.confirmedBookingId,
+            waitlistJoinedDate = form.waitlistJoinedDate,
+            joiningWaitlist = form.joiningWaitlist,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -280,6 +293,45 @@ class BookingFlowViewModel @AssistedInject constructor(
             BookingFlowEvent.Confirm -> confirm()
             BookingFlowEvent.DismissError -> form.update { it.copy(submitError = null) }
             BookingFlowEvent.ConfirmationShown -> form.update { it.copy(confirmedBookingId = null) }
+            BookingFlowEvent.JoinWaitlist -> joinWaitlist()
+        }
+    }
+
+    /**
+     * Joins the waitlist for the selected day, any time within the barber's working hours.
+     * When someone cancels, OfferFreedSlotUseCase offers the freed time to the first in line.
+     */
+    private fun joinWaitlist() {
+        val state = uiState.value
+        val date = state.selectedDate ?: return
+        val salon = state.salon ?: return
+        val staff = state.staff ?: return
+        if (!state.canChooseTime || state.joiningWaitlist) return
+        val window = AvailabilityCalculator.workingWindow(
+            DayAvailabilityInput(date, salon.openingHours, staff.workingHours, emptyList(), emptySet(), Instant.EPOCH),
+        ) ?: return
+        form.update { it.copy(joiningWaitlist = true, submitError = null) }
+        viewModelScope.launch {
+            try {
+                val user = authRepository.authState.filterIsInstance<AuthState.SignedIn>().first().user
+                waitlistRepository.join(
+                    WaitlistEntry(
+                        id = "",
+                        salonId = salon.id,
+                        customerId = user.uid,
+                        staffId = staff.id,
+                        serviceIds = state.selectedServices.map { it.id },
+                        durationMin = state.durationMin,
+                        date = date,
+                        windowStart = SalonTime.toInstant(date, window.start),
+                        windowEnd = SalonTime.toInstant(date, window.end),
+                        status = WaitlistStatus.WAITING,
+                    ),
+                )
+                form.update { it.copy(joiningWaitlist = false, waitlistJoinedDate = date) }
+            } catch (e: DataException) {
+                form.update { it.copy(joiningWaitlist = false, submitError = SubmitError.Failed(e.error)) }
+            }
         }
     }
 

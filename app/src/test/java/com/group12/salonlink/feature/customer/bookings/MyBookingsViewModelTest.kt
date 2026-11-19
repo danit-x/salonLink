@@ -8,10 +8,15 @@ import com.group12.salonlink.domain.model.BookingType
 import com.group12.salonlink.domain.model.DataError
 import com.group12.salonlink.domain.model.Role
 import com.group12.salonlink.domain.model.UserProfile
+import com.group12.salonlink.domain.usecase.AcceptWaitlistOfferUseCase
 import com.group12.salonlink.domain.usecase.CancelBookingUseCase
+import com.group12.salonlink.domain.usecase.CreateBookingUseCase
+import com.group12.salonlink.domain.usecase.ObserveAvailabilityUseCase
+import com.group12.salonlink.domain.usecase.OfferFreedSlotUseCase
 import com.group12.salonlink.testing.FakeAuthRepository
 import com.group12.salonlink.testing.FakeBookingRepository
 import com.group12.salonlink.testing.FakeNotificationRepository
+import com.group12.salonlink.testing.FakeWaitlistRepository
 import com.group12.salonlink.testing.FakeSalonRepository
 import com.group12.salonlink.testing.MainDispatcherRule
 import java.time.Clock
@@ -43,6 +48,7 @@ class MyBookingsViewModelTest {
 
     private val bookings = FakeBookingRepository()
     private val notifications = FakeNotificationRepository()
+    private val waitlist = FakeWaitlistRepository()
     private val auth = FakeAuthRepository().apply {
         signInAs(UserProfile("kavindu", "Kavindu Perera", "k@example.com", null, Role.CUSTOMER))
     }
@@ -54,7 +60,10 @@ class MyBookingsViewModelTest {
     )
 
     private fun TestScope.viewModel() = MyBookingsViewModel(
-        auth, bookings, FakeSalonRepository(), CancelBookingUseCase(bookings, notifications, clock), clock,
+        auth, bookings, FakeSalonRepository(), waitlist,
+        CancelBookingUseCase(bookings, notifications, OfferFreedSlotUseCase(waitlist, clock), clock),
+        AcceptWaitlistOfferUseCase(CreateBookingUseCase(FakeSalonRepository(), bookings, ObserveAvailabilityUseCase(FakeSalonRepository(), bookings, clock), notifications, clock), waitlist, clock),
+        clock,
     ).also { vm -> backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} } }
 
     @Test

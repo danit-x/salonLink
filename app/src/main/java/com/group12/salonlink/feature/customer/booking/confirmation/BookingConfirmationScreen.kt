@@ -86,6 +86,7 @@ fun BookingConfirmationScreen(
     onBack: () -> Unit,
     onViewBookings: () -> Unit,
     onEvent: (BookingConfirmationEvent) -> Unit = {},
+    onOpenQueue: (Booking) -> Unit = {},
 ) {
     val context = LocalContext.current
     val booking = state.booking
@@ -151,6 +152,15 @@ fun BookingConfirmationScreen(
                     ConfirmationMessage(booking)
                 }
                 AppointmentTicket(booking, salon)
+                // On the day itself, the live queue shows how many people are ahead (Phase 7).
+                if (booking.status.holdsSlot && SalonTime.localDateOf(booking.start) == SalonTime.localDateOf(Instant.now())) {
+                    GlassButton(
+                        text = stringResource(R.string.queue_open),
+                        onClick = { onOpenQueue(booking) },
+                        containerColor = SalonTheme.colors.navIndicator,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 GradientButton(
                     text = stringResource(R.string.confirmation_add_calendar),
                     onClick = { context.addToCalendar(booking, salon, calendarTitle.orEmpty(), noAppMessage) },

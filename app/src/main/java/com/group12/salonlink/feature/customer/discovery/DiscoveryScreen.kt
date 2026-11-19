@@ -84,6 +84,7 @@ data class DiscoveryActions(
     val onOpenBooking: (Booking) -> Unit = {},
     val onOpenConcierge: () -> Unit = {},
     val onOpenNotifications: () -> Unit = {},
+    val onOpenQueue: (Booking) -> Unit = {},
 )
 
 /** Bell with a coral dot while there are unread notifications. */
@@ -498,6 +499,17 @@ private fun QuickActions(state: DiscoveryUiState, actions: DiscoveryActions) {
                     modifier = Modifier
                         .weight(1f)
                         .heightIn(max = 48.dp),
+                )
+            }
+            val today = state.upcoming?.takeIf { state.upcomingDay == UpcomingDay.TODAY }
+            if (today != null) {
+                GlassButton(
+                    text = stringResource(R.string.action_queue),
+                    onClick = { actions.onOpenQueue(today) },
+                    leadingIcon = R.drawable.ic_sparkles,
+                    containerColor = SalonTheme.colors.peachContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
                 )
             }
             if (last != null) {

@@ -29,8 +29,13 @@ object NotificationText {
         NotificationType.UNKNOWN -> R.string.notification_status_other
     }
 
-    fun of(context: Context, n: AppNotification): Pair<String, String> =
-        context.getString(titleRes(n)) to context.getString(
-            R.string.notification_body, n.title, n.staffName, SalonTime.formatShortDate(n.start), SalonTime.formatTime(n.start),
-        )
+    fun of(context: Context, n: AppNotification): Pair<String, String> {
+        val time = "${SalonTime.formatShortDate(n.start)}, ${SalonTime.formatTime(n.start)}"
+        val body = if (n.type == NotificationType.WAITLIST_OFFER) {
+            context.getString(R.string.waitlist_offer_body, time)
+        } else {
+            context.getString(R.string.notification_body, n.title, n.staffName, SalonTime.formatShortDate(n.start), SalonTime.formatTime(n.start))
+        }
+        return context.getString(titleRes(n)) to body
+    }
 }

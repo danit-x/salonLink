@@ -335,6 +335,70 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // ---------- Waitlist (v6, Phase 7) ----------
+      // Entries hold no names (only an account id, barber, services and times), so any
+      // signed-in app may read them: the app that cancels a booking passes the freed time to
+      // the first waiting customer (there is no server on Spark to do it).
+      match /waitlist/{entryId} {
+        allow read: if signedIn();
+
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly(['customerId', 'staffId', 'serviceIds', 'durationMin', 'date',
+                                                    'windowStart', 'windowEnd', 'status', 'offer', 'createdAt'])
+          && request.resource.data.customerId == request.auth.uid
+          && request.resource.data.status == 'WAITING'
+          && request.resource.data.offer == null
+          && request.resource.data.staffId is string
+          && request.resource.data.serviceIds is list && request.resource.data.serviceIds.size() > 0
+          && request.resource.data.serviceIds.size() <= 10
+          && request.resource.data.durationMin is int && request.resource.data.durationMin > 0
+          && request.resource.data.durationMin <= maxSlots() * 10
+          && request.resource.data.date is string && request.resource.data.date.size() == 10
+          && request.resource.data.windowStart is timestamp
+          && request.resource.data.windowEnd is timestamp
+          && request.resource.data.windowStart < request.resource.data.windowEnd
+          && request.resource.data.createdAt == request.time;
+
+        // The customer may accept (only while the offer is valid) or leave.
+        // Anyone signed in may turn a waiting entry (or an expired offer) into a NEW offer that
+        // lasts at most ~10 minutes. Accepting still goes through the booking engine, so a fake
+        // offer can't create a booking on a taken slot.
+        allow update: if
+          (
+            signedIn() && resource.data.customerId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+            && (
+              request.resource.data.status == 'LEFT'
+              || (request.resource.data.status == 'ACCEPTED' && resource.data.status == 'OFFERED'
+                  && request.time < resource.data.offer.expiresAt)
+            )
+          )
+          || (
+            signedIn()
+            && (resource.data.status == 'WAITING'
+                || (resource.data.status == 'OFFERED' && request.time >= resource.data.offer.expiresAt))
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'offer'])
+            && request.resource.data.status == 'OFFERED'
+            && request.resource.data.offer.keys().hasOnly(['start', 'end', 'staffId', 'expiresAt'])
+            && request.resource.data.offer.staffId == resource.data.staffId
+            && request.resource.data.offer.start < request.resource.data.offer.end
+            && request.resource.data.offer.expiresAt <= request.time + duration.value(11, 'm')
+          );
+
+        allow delete: if false;
+      }
+
+      // ---------- Live queue boards (v6, Phase 7) ----------
+      // One anonymous board per barber (booking ids, times, statuses, no names). Written by the
+      // salon's own staff app, read by customers to see how many people are ahead.
+      match /queue/{staffId} {
+        allow read: if signedIn();
+        allow write: if isMemberOf(salonId)
+          && request.resource.data.keys().hasOnly(['entries', 'updatedAt'])
+          && request.resource.data.entries is list && request.resource.data.entries.size() <= 80
+          && request.resource.data.updatedAt == request.time;
+      }
+
       function lockIsPartOfBooking(lock, b) {
         return b.staffId == lock.staffId
           && b.status == 'BOOKED'
@@ -372,6 +436,11 @@ service cloud.firestore {
     // Firestore only allows the query if the rule holds for EVERY possible result, so the
     // app must filter on customerId == the caller's uid, or the whole query is refused.
     match /{path=**}/bookings/{bookingId} {
+      allow read: if signedIn() && resource.data.customerId == request.auth.uid;
+    }
+
+    // "My waitlist" across salons, same idea as "My bookings" above.
+    match /{path=**}/waitlist/{entryId} {
       allow read: if signedIn() && resource.data.customerId == request.auth.uid;
     }
 

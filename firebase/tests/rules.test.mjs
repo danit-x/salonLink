@@ -642,3 +642,69 @@ describe("Owner manages the salon", () => {
     await assertFails(setDoc(doc(staffUser(), "salons/aura"), details));
   });
 });
+
+// ---------- Waitlist + live queue (v6, Phase 7) ----------
+
+describe("Waitlist and live queue", () => {
+  const kavindu = () => as("kavindu", "kavindu@example.com");
+  const nimal = () => as("nimal", "nimal@example.com");
+  const kasunStaff = () => as("kasun-uid", "kasun@aura.lk");
+  const day = new Date(Date.now() + 3 * 86_400_000);
+  const entry = (extra = {}) => ({
+    customerId: "kavindu", staffId: "kasun", serviceIds: ["haircut"], durationMin: 30,
+    date: day.toISOString().slice(0, 10),
+    windowStart: new Date(day.getTime() - 4 * 3600_000), windowEnd: new Date(day.getTime() + 4 * 3600_000),
+    status: "WAITING", offer: null, createdAt: serverTimestamp(), ...extra,
+  });
+  const offer = (minutes = 10) => ({
+    start: day, end: new Date(day.getTime() + 30 * 60_000), staffId: "kasun",
+    expiresAt: new Date(Date.now() + minutes * 60_000),
+  });
+  const ref = (db) => doc(db, "salons/aura/waitlist/w1");
+
+  beforeEach(async () => {
+    await seed("users/kasun-uid", { ...customerProfile("kasun@aura.lk", { role: "STAFF", salonId: "aura", staffId: "kasun" }), createdAt: new Date() });
+  });
+
+  test("a customer joins the waitlist for themselves only", async () => {
+    await assertSucceeds(setDoc(ref(kavindu()), entry()));
+    await assertFails(setDoc(doc(kavindu(), "salons/aura/waitlist/w2"), entry({ customerId: "nimal" })));
+    await assertFails(setDoc(doc(kavindu(), "salons/aura/waitlist/w3"), entry({ status: "OFFERED" })));
+  });
+
+  test("someone else's cancellation can pass a freed slot as a short offer", async () => {
+    await seed("salons/aura/waitlist/w1", { ...entry(), createdAt: new Date() });
+    await assertSucceeds(updateDoc(ref(nimal()), { status: "OFFERED", offer: offer(10) }));
+  });
+
+  test("an offer can't last longer than ~10 minutes or change who it's for", async () => {
+    await seed("salons/aura/waitlist/w1", { ...entry(), createdAt: new Date() });
+    await assertFails(updateDoc(ref(nimal()), { status: "OFFERED", offer: offer(60) }));
+    await assertFails(updateDoc(ref(nimal()), { status: "OFFERED", offer: offer(10), customerId: "nimal" }));
+  });
+
+  test("a live offer can't be overwritten by another one", async () => {
+    await seed("salons/aura/waitlist/w1", { ...entry({ status: "OFFERED", offer: offer(10) }), createdAt: new Date() });
+    await assertFails(updateDoc(ref(nimal()), { status: "OFFERED", offer: offer(9) }));
+  });
+
+  test("only the customer accepts, and only before the offer expires", async () => {
+    await seed("salons/aura/waitlist/w1", { ...entry({ status: "OFFERED", offer: offer(10) }), createdAt: new Date() });
+    await assertFails(updateDoc(ref(nimal()), { status: "ACCEPTED" }));
+    await assertSucceeds(updateDoc(ref(kavindu()), { status: "ACCEPTED" }));
+    await seed("salons/aura/waitlist/w2", { ...entry({ status: "OFFERED", offer: offer(-1) }), createdAt: new Date() });
+    await assertFails(updateDoc(doc(kavindu(), "salons/aura/waitlist/w2"), { status: "ACCEPTED" }));
+  });
+
+  test("'my waitlist' works as a collection-group query filtered to the caller", async () => {
+    await seed("salons/aura/waitlist/w1", { ...entry(), createdAt: new Date() });
+    await assertSucceeds(getDocs(query(collectionGroup(kavindu(), "waitlist"), where("customerId", "==", "kavindu"))));
+  });
+
+  test("staff publish the anonymous queue board, customers only read it", async () => {
+    const board = { entries: [{ bookingId: "b1", start: day, durationMin: 30, status: "BOOKED", type: "APPOINTMENT", since: null }], updatedAt: serverTimestamp() };
+    await assertSucceeds(setDoc(doc(kasunStaff(), "salons/aura/queue/kasun"), board));
+    await assertSucceeds(getDoc(doc(kavindu(), "salons/aura/queue/kasun")));
+    await assertFails(setDoc(doc(kavindu(), "salons/aura/queue/kasun"), board));
+  });
+});

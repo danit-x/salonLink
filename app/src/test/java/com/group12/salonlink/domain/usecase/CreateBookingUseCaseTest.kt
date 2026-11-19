@@ -16,6 +16,7 @@ import com.group12.salonlink.domain.model.TimeRange
 import com.group12.salonlink.domain.model.WeeklyHours
 import com.group12.salonlink.testing.FakeBookingRepository
 import com.group12.salonlink.testing.FakeNotificationRepository
+import com.group12.salonlink.testing.FakeWaitlistRepository
 import com.group12.salonlink.testing.FakeSalonRepository
 import java.time.Clock
 import java.time.DayOfWeek
@@ -170,7 +171,7 @@ class CreateBookingUseCaseTest {
     fun `cancelling frees the slot for someone else`() = runTest {
         createBooking(request())
         // Same day (less than 24 h ahead), so only the salon may cancel it.
-        CancelBookingUseCase(bookings, notifications, clock)("aura", "b1", byStaff = true)
+        CancelBookingUseCase(bookings, notifications, OfferFreedSlotUseCase(FakeWaitlistRepository(), clock), clock)("aura", "b1", byStaff = true)
         assertEquals(BookingStatus.CANCELLED, bookings.bookings.value.getValue("b1").status)
         assertTrue(at(17, 30) in availability("aura", "kasun", thursday, 30).first())
         createBooking(request(id = "b2")) // the same time again: now fine
@@ -179,7 +180,7 @@ class CreateBookingUseCaseTest {
     @Test
     fun `a customer cannot cancel less than 24 h before, the salon can`() = runTest {
         createBooking(request())
-        expectError(DataError.TOO_LATE_TO_CANCEL) { CancelBookingUseCase(bookings, notifications, clock)("aura", "b1") }
+        expectError(DataError.TOO_LATE_TO_CANCEL) { CancelBookingUseCase(bookings, notifications, OfferFreedSlotUseCase(FakeWaitlistRepository(), clock), clock)("aura", "b1") }
         assertEquals(BookingStatus.BOOKED, bookings.bookings.value.getValue("b1").status)
     }
 
@@ -187,7 +188,7 @@ class CreateBookingUseCaseTest {
     fun `a customer cancels a booking two days ahead and gets a feed entry`() = runTest {
         val later = SalonTime.toInstant(thursday.plusDays(2), LocalTime.of(11, 0))
         createBooking(request(start = later))
-        CancelBookingUseCase(bookings, notifications, clock)("aura", "b1")
+        CancelBookingUseCase(bookings, notifications, OfferFreedSlotUseCase(FakeWaitlistRepository(), clock), clock)("aura", "b1")
         assertEquals(BookingStatus.CANCELLED, bookings.bookings.value.getValue("b1").status)
         assertEquals(
             listOf("booking_confirmed_b1", "booking_cancelled_b1"),

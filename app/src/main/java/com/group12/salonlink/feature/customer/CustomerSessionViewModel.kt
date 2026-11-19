@@ -13,6 +13,8 @@ import com.group12.salonlink.domain.repository.AuthRepository
 import com.group12.salonlink.domain.repository.BookingRepository
 import com.group12.salonlink.domain.repository.NotificationRepository
 import com.group12.salonlink.domain.repository.ReminderScheduler
+import com.group12.salonlink.domain.repository.WaitlistRepository
+import com.group12.salonlink.domain.usecase.addBestEffort
 import com.group12.salonlink.feature.customer.notifications.NotificationText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -42,7 +44,8 @@ import kotlinx.coroutines.launch
 class CustomerSessionViewModel @Inject constructor(
     authRepository: AuthRepository,
     bookingRepository: BookingRepository,
-    notificationRepository: NotificationRepository,
+    private val notificationRepository: NotificationRepository,
+    waitlistRepository: WaitlistRepository,
     private val reminderScheduler: ReminderScheduler,
     private val notifier: SystemNotifier,
     @param:ApplicationContext private val context: Context,
@@ -82,6 +85,36 @@ class CustomerSessionViewModel @Inject constructor(
                 list.filter { !it.read && it.id !in announced && it.type.isFromSalon() }.forEach { announce(it) }
                 announced += list.map { it.id }
             }
+        }
+    }
+
+    /** Waitlist offers already announced (entry + offer time), so each is shown once. */
+    private val announcedOffers = mutableSetOf<String>()
+
+    init {
+        // 4. Waitlist offers: someone cancelled and the freed time is held for this customer.
+        viewModelScope.launch {
+            uid.flatMapLatest { id -> waitlistRepository.observeMine(id).map { id to it } }
+                .catch { /* can't read the waitlist right now; the Bookings tab shows it later */ }
+                .collect { (customer, entries) ->
+                    val now = clock.instant()
+                    entries.forEach { entry ->
+                        val offer = entry.activeOffer(now) ?: return@forEach
+                        val key = "${entry.id}_${offer.start.epochSecond}"
+                        if (!announcedOffers.add(key)) return@forEach
+                        val notification = AppNotification(
+                            id = AppNotification.idFor(NotificationType.WAITLIST_OFFER, key),
+                            type = NotificationType.WAITLIST_OFFER,
+                            salonId = entry.salonId,
+                            bookingId = entry.id,
+                            title = "",
+                            staffName = "",
+                            start = offer.start,
+                        )
+                        notificationRepository.addBestEffort(customer, notification)
+                        announce(notification)
+                    }
+                }
         }
     }
 

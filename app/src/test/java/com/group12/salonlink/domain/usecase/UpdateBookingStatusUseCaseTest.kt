@@ -12,6 +12,7 @@ import com.group12.salonlink.feature.staff.schedule.DayStats
 import com.group12.salonlink.feature.staff.schedule.staffActions
 import com.group12.salonlink.testing.FakeBookingRepository
 import com.group12.salonlink.testing.FakeNotificationRepository
+import com.group12.salonlink.testing.FakeWaitlistRepository
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
@@ -29,7 +30,7 @@ class UpdateBookingStatusUseCaseTest {
     private val clock = Clock.fixed(at(10), ZoneOffset.UTC)
     private val bookings = FakeBookingRepository()
     private val notifications = FakeNotificationRepository()
-    private val update = UpdateBookingStatusUseCase(bookings, notifications, CancelBookingUseCase(bookings, notifications, clock))
+    private val update = UpdateBookingStatusUseCase(bookings, notifications, CancelBookingUseCase(bookings, notifications, OfferFreedSlotUseCase(FakeWaitlistRepository(), clock), clock), OfferFreedSlotUseCase(FakeWaitlistRepository(), clock))
 
     private fun booking(id: String, status: BookingStatus = BookingStatus.BOOKED, customer: String? = "kavindu", price: Long = 1500, type: BookingType = BookingType.APPOINTMENT) = Booking(
         id = id, salonId = "aura", customerId = customer, customerName = "Kavindu", staffId = "kasun", staffName = "Kasun",

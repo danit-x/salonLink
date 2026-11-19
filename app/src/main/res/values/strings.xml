@@ -373,6 +373,36 @@
     <string name="invite_sent">Invite saved for %1$s. Ask them to register with this email.</string>
     <string name="save_staff_first">Save the staff member first, then you can add time off and invite them.</string>
 
+    <!-- ===================== Phase 7: waitlist and live queue ===================== -->
+    <string name="waitlist_join">Join the waitlist for this day</string>
+    <string name="waitlist_join_hint">We\'ll offer you a time if someone cancels.</string>
+    <string name="waitlist_joined">You\'re on the waitlist for %1$s. We\'ll let you know if a time frees up.</string>
+    <string name="waitlist_title">Waitlist</string>
+    <string name="waitlist_waiting">Waiting for %1$s with %2$s</string>
+    <string name="waitlist_offer_title">A time freed up: %1$s</string>
+    <string name="waitlist_offer_expires">Hold expires at %1$s</string>
+    <string name="waitlist_accept">Book it</string>
+    <string name="waitlist_decline">No thanks</string>
+    <string name="waitlist_leave">Leave waitlist</string>
+    <string name="waitlist_accepted">Booked! See you at %1$s.</string>
+    <string name="waitlist_offer_body">%1$s · hold it within 10 minutes in Bookings</string>
+
+    <string name="queue_title">Live queue</string>
+    <string name="queue_open">See live queue</string>
+    <string name="queue_position">You\'re #%1$d</string>
+    <string name="queue_in_chair">You\'re in the chair</string>
+    <string name="queue_done">This visit is finished</string>
+    <string name="queue_eta">Expected start about %1$s (%2$d min)</string>
+    <string name="queue_eta_now">You\'re next. Please stay close.</string>
+    <string name="queue_ahead_title">Ahead of you</string>
+    <string name="queue_ahead_in_chair">In the chair</string>
+    <string name="queue_ahead_walk_in">Walk-in · %1$d min</string>
+    <string name="queue_ahead_booked">Booked %1$s · %2$d min</string>
+    <string name="queue_updated">Updated %1$s by the salon</string>
+    <string name="queue_unavailable">The salon hasn\'t opened the live queue yet. Your booked time is %1$s.</string>
+    <string name="queue_not_today">The live queue shows on the day of your visit.</string>
+    <string name="action_queue">Queue</string>
+
     <!-- Salon settings (owner) -->
     <string name="salon_settings_title">Salon details</string>
     <string name="salon_name_label">Salon name</string>

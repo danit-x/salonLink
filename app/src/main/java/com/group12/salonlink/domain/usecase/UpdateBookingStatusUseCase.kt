@@ -21,6 +21,7 @@ class UpdateBookingStatusUseCase @Inject constructor(
     private val bookingRepository: BookingRepository,
     private val notificationRepository: NotificationRepository,
     private val cancelBooking: CancelBookingUseCase,
+    private val offerFreedSlot: OfferFreedSlotUseCase,
 ) {
     /** @throws DataException NOT_ALLOWED if the status table forbids the move. */
     suspend operator fun invoke(salonId: String, bookingId: String, next: BookingStatus) {
@@ -33,6 +34,8 @@ class UpdateBookingStatusUseCase @Inject constructor(
         if (!booking.status.canTransitionTo(next)) throw DataException(DataError.NOT_ALLOWED)
 
         bookingRepository.updateStatus(salonId, bookingId, next)
+        // A no-show frees the rest of the time: offer it to the waitlist like a cancellation.
+        if (next == BookingStatus.MISSED) offerFreedSlot(booking)
 
         // WAITING is an internal queue detail; the customer already got "checked in".
         val customer = booking.customerId

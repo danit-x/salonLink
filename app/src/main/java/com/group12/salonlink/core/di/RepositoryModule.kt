@@ -46,6 +46,16 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindWaitlistRepository(impl: com.group12.salonlink.data.repository.FirestoreWaitlistRepository):
+        com.group12.salonlink.domain.repository.WaitlistRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindQueueRepository(impl: com.group12.salonlink.data.repository.FirestoreQueueRepository):
+        com.group12.salonlink.domain.repository.QueueRepository
+
+    @Binds
+    @Singleton
     abstract fun bindReminderScheduler(impl: com.group12.salonlink.data.reminder.WorkManagerReminderScheduler):
         com.group12.salonlink.domain.repository.ReminderScheduler
 }

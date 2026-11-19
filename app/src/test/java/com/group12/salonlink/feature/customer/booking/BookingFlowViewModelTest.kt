@@ -18,6 +18,7 @@ import com.group12.salonlink.domain.usecase.ObserveAvailabilityUseCase
 import com.group12.salonlink.testing.FakeAuthRepository
 import com.group12.salonlink.testing.FakeBookingRepository
 import com.group12.salonlink.testing.FakeNotificationRepository
+import com.group12.salonlink.testing.FakeWaitlistRepository
 import com.group12.salonlink.testing.FakeSalonRepository
 import com.group12.salonlink.testing.MainDispatcherRule
 import java.time.Clock
@@ -68,6 +69,7 @@ class BookingFlowViewModelTest {
     }
     private val bookings = FakeBookingRepository()
     private val notifications = FakeNotificationRepository()
+    private val waitlist = FakeWaitlistRepository()
     private val auth = FakeAuthRepository().apply {
         signInAs(UserProfile("kavindu", "Kavindu Perera", "kavindu@example.com", null, Role.CUSTOMER))
     }
@@ -79,6 +81,7 @@ class BookingFlowViewModelTest {
         authRepository = auth,
         observeAvailability = availability,
         createBooking = CreateBookingUseCase(salons, bookings, availability, notifications, clock),
+        waitlistRepository = waitlist,
         clock = clock,
     )
 
@@ -209,8 +212,21 @@ class BookingFlowViewModelTest {
             authRepository = auth,
             observeAvailability = availability,
             createBooking = CreateBookingUseCase(salons, bookings, availability, notifications, clock),
+            waitlistRepository = waitlist,
             clock = clock,
         ).also { collect(it) }
         assertEquals(DataError.NOT_FOUND, vm.uiState.value.loadError)
+    }
+
+    @Test
+    fun `no time suits - join the waitlist for the day within working hours`() = runTest {
+        val vm = viewModel().also { collect(it) }
+        vm.onEvent(BookingFlowEvent.JoinWaitlist)
+        assertEquals(thursday, vm.uiState.value.waitlistJoinedDate)
+        val entry = waitlist.entries.value.values.single()
+        assertEquals("kavindu", entry.customerId)
+        assertEquals(50, entry.durationMin)
+        assertEquals(at(9), entry.windowStart)
+        assertEquals(at(19), entry.windowEnd)
     }
 }

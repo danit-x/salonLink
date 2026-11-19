@@ -247,6 +247,30 @@ private fun TimesSection(state: BookingFlowUiState, barberFirstName: String, onE
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        // Phase 7: nothing suits? Wait for a cancellation on this day.
+        if (state.slots is SlotsState.Ready && state.isBookableDay(date)) {
+            WaitlistPrompt(state, date, onEvent)
+        }
+    }
+}
+
+@Composable
+private fun WaitlistPrompt(state: BookingFlowUiState, date: LocalDate, onEvent: (BookingFlowEvent) -> Unit) {
+    if (state.waitlistJoinedDate == date) {
+        FormBanner(stringResource(R.string.waitlist_joined, SalonTime.formatDayHeading(date)), BannerTone.INFO)
+        return
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        androidx.compose.material3.TextButton(
+            onClick = { onEvent(BookingFlowEvent.JoinWaitlist) },
+            enabled = state.canChooseTime && !state.joiningWaitlist,
+        ) { Text(stringResource(R.string.waitlist_join)) }
+        Text(
+            stringResource(R.string.waitlist_join_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 12.dp),
+        )
     }
 }
 
