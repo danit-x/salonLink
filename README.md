@@ -18,7 +18,7 @@ Screenshots: [`docs/screenshots/`](docs/screenshots/).
 - Coil 3 (images), WorkManager (reminders)
 - Tests: JUnit, MockK, Turbine, Compose UI tests, `@firebase/rules-unit-testing` on the emulator
 
-More detail: [Architecture & diagrams](docs/ARCHITECTURE.md) · [Test evidence T01–T12](docs/TEST-EVIDENCE.md) · [Demo script](docs/DEMO-SCRIPT.md) · [Implementation plan](PLAN.md)
+More detail: [Architecture & diagrams](docs/ARCHITECTURE.md) · [Test evidence T01–T12](docs/TEST-EVIDENCE.md) · [Demo script](docs/DEMO-SCRIPT.md) · [Manual test guide](docs/MANUAL-TEST-GUIDE.md) · [Implementation plan](PLAN.md)
 
 ## Run it
 
