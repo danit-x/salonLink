@@ -64,12 +64,19 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-sa.json"
           ./gradlew assembleBeta appDistributionUploadBeta --console=plain
 
+      - name: Prepare stable customer download filename
+        if: github.event_name != 'pull_request'
+        run: |
+          APK="$(find app/build/outputs/apk/beta -maxdepth 1 -name '*.apk' -print -quit)"
+          test -n "$APK"
+          cp "$APK" SalonLink.apk
+
       - name: Keep APK as a short-lived CI artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: salonlink-beta-apk
-          path: app/build/outputs/apk/beta/*.apk
+          path: SalonLink.apk
           retention-days: 14
 
       - name: Publish customer APK on latest GitHub Release
@@ -80,9 +87,8 @@ jobs:
           name: SalonLink Android customer build ${{ github.run_number }}
           make_latest: true
           generate_release_notes: true
-          files: app/build/outputs/apk/beta/*.apk
+          files: SalonLink.apk
           fail_on_unmatched_files: true
-          append_body: true
 
       - name: Remove secrets from the runner
         if: always()
