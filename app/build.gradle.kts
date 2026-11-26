@@ -68,15 +68,6 @@ android {
             // throwaway accounts. Off by default, and always off in release builds.
             val useEmulators = providers.gradleProperty("salonlink.useEmulators").orNull == "true"
             buildConfigField("boolean", "USE_FIREBASE_EMULATORS", useEmulators.toString())
-
-            // Firebase App Distribution: `./gradlew assembleDebug appDistributionUploadDebug`.
-            // Auth comes from `firebase login` (no key file in the repo). Testers are managed as a
-            // group in the Firebase console; override with -Psalonlink.testerGroups=a,b.
-            firebaseAppDistribution {
-                artifactType = "APK"
-                groups = providers.gradleProperty("salonlink.testerGroups").getOrElse("testers")
-                releaseNotes = gitLastCommitSubject
-            }
         }
         release {
             buildConfigField("boolean", "USE_FIREBASE_EMULATORS", "false")
@@ -85,6 +76,23 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        // "beta" = the release build + the in-app update check, for testers' phones.
+        // WHY a separate build type: Google Play forbids apps that update themselves, so the full
+        // App Distribution SDK goes ONLY into beta (see `betaImplementation` below). The Play
+        // Store build ("release") never contains it.
+        // Built and uploaded by CI on every push to main (.github/workflows/android.yml), or by
+        // hand: `./gradlew assembleBeta appDistributionUploadBeta`.
+        create("beta") {
+            initWith(getByName("release"))
+            signingConfig = releaseSigning      // same key every time, so updates install over it
+            matchingFallbacks += "release"
+            firebaseAppDistribution {
+                artifactType = "APK"
+                // Testers are managed as a group in the Firebase console.
+                groups = providers.gradleProperty("salonlink.testerGroups").getOrElse("testers")
+                releaseNotes = gitLastCommitSubject
+            }
         }
     }
 
@@ -129,6 +137,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    // In-app updates for testers: the API compiles everywhere (and does nothing on its own);
+    // the full SDK that shows the "Update" dialog is added to the beta build only.
+    implementation(libs.firebase.appdistribution.api)
+    "betaImplementation"(libs.firebase.appdistribution)
     implementation(libs.kotlinx.coroutines.play.services)   // lets us `await()` Firebase Tasks
 
     // --- Images: barber portraits and portfolio photos ---
