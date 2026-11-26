@@ -1,16 +1,7 @@
 # =====================================================================================
-# SalonLink — CI/CD (GitHub Actions, free minutes on a private repo)
-# -------------------------------------------------------------------------------------
-# Every push and pull request: build the app and run the unit tests (CI).
-# Every push to main: also build the signed "beta" APK and send it to the "testers" group
-# in Firebase App Distribution (CD). Testers' phones then show an "Update" dialog the next
-# time SalonLink opens (MainActivity.checkForTesterUpdate).
-#
-# Repository secrets (Settings → Secrets and variables → Actions):
-#   GOOGLE_SERVICES_JSON_B64   app/google-services.json, base64
-#   KEYSTORE_B64               salonlink-release.jks, base64
-#   KEYSTORE_PASSWORD          the keystore password (store and key use the same one)
-#   FIREBASE_SA_JSON_B64       service-account key with access to App Distribution, base64
+# SalonLink — CI/CD
+# Pull requests: unit tests. Push to main: signed beta APK, Firebase tester distribution,
+# and a public customer download on the latest GitHub Release.
 # =====================================================================================
 name: Android CI/CD
 
@@ -18,9 +9,11 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:        # "Run workflow" button in the Actions tab
+  workflow_dispatch:
 
-# A newer push to the same branch cancels the older, still-running build.
+permissions:
+  contents: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -34,8 +27,6 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v4
         with:
-          # WHY the full history: versionCode = number of commits (app/build.gradle.kts).
-          # A shallow clone would count 1, and phones would refuse the "update".
           fetch-depth: 0
 
       - name: Set up JDK 21
@@ -55,8 +46,6 @@ jobs:
           chmod +x gradlew
           ./gradlew testDebugUnitTest --console=plain
 
-      # ---------- Delivery: only for pushes to main ----------
-
       - name: Restore signing key
         if: github.event_name != 'pull_request'
         run: |
@@ -75,13 +64,25 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-sa.json"
           ./gradlew assembleBeta appDistributionUploadBeta --console=plain
 
-      - name: Keep the APK as a download on the run page
+      - name: Keep APK as a short-lived CI artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: salonlink-beta-apk
           path: app/build/outputs/apk/beta/*.apk
           retention-days: 14
+
+      - name: Publish customer APK on latest GitHub Release
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: customer-${{ github.run_number }}
+          name: SalonLink Android customer build ${{ github.run_number }}
+          make_latest: true
+          generate_release_notes: true
+          files: app/build/outputs/apk/beta/*.apk
+          fail_on_unmatched_files: true
+          append_body: true
 
       - name: Remove secrets from the runner
         if: always()
